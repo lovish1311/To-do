@@ -1,24 +1,34 @@
 import 'package:flutter/material.dart';
-import 'package:hive_flutter/hive_flutter.dart'; // Import Hive
+import 'package:hive_flutter/hive_flutter.dart';
 import 'package:path_provider/path_provider.dart';
-import 'package:to_do/utils/constants.dart'; // Import path_provider for Hive path
+import 'package:provider/provider.dart'; // <--- ADD THIS IMPORT
+import 'package:to_do/models/task_list.dart';
+import 'package:to_do/services/task_list_service.dart'; // <--- ADD THIS IMPORT
+import 'package:to_do/viewmodels/task_list_view_model.dart'; // <--- ADD THIS IMPORT
+import 'package:to_do/utils/constants.dart'; // For AppConstants
+import 'package:to_do/views/screens/task_lists_screen.dart'; // <--- ADD THIS IMPORT
 
 void main() async {
-  // Ensure Flutter widgets are initialized before Hive
   WidgetsFlutterBinding.ensureInitialized();
 
-  // Get the application documents directory for Hive to store its files
   final appDocumentDirectory = await getApplicationDocumentsDirectory();
   Hive.init(appDocumentDirectory.path);
 
-  // Open the Hive boxes. We'll define the models for these boxes later.
-  // Using .openBox() is generally fine for main boxes used throughout the app.
-  // For 'task_lists', we'll store our categories of tasks.
-  await Hive.openBox(AppConstants.taskListBox);
-  // For 'tasks', we'll store individual tasks.
-  await Hive.openBox(AppConstants.taskBox); // We'll use a separate box for individual tasks
+  Hive.registerAdapter(TaskListAdapter());
 
-  runApp(const MyApp());
+  await Hive.openBox<TaskList>(AppConstants.taskListBox); // Use constant
+  await Hive.openBox(AppConstants.taskBox); // Use constant
+
+  // Initialize the TaskListService
+  final taskListService = TaskListService();
+
+  runApp(
+    // Wrap MyApp with ChangeNotifierProvider to make TaskListViewModel available
+    ChangeNotifierProvider(
+      create: (context) => TaskListViewModel(taskListService), // Pass the service
+      child: const MyApp(),
+    ),
+  );
 }
 
 class MyApp extends StatelessWidget {
@@ -27,29 +37,13 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'To-Do App', // Updated app title
+      title: 'To-Do App',
       theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.blue), // Changed seed color
-        useMaterial3: true, // Enable Material 3 if not already
+        colorScheme: ColorScheme.fromSeed(seedColor: Colors.blue),
+        useMaterial3: true,
       ),
-      // Set the home to a placeholder for TaskListsScreen for now.
-      // We will replace this with the actual TaskListsScreen widget once created.
-      home: Scaffold(
-        appBar: AppBar(
-          title: const Text('My Task Lists'),
-          backgroundColor: Colors.blue,
-          foregroundColor: Colors.white,
-        ),
-        body: const Center(
-          child: Text(
-            'Loading Task Lists (Placeholder)',
-            style: TextStyle(fontSize: 24, color: Colors.grey),
-          ),
-        ),
-      ),
+      // Set the home to TaskListsScreen
+      home: const TaskListsScreen(), // Now TaskListsScreen will have access to the ViewModel
     );
   }
 }
-
-// The MyHomePage and its State are no longer needed for our To-Do app,
-// so they are removed from this main.dart file.
