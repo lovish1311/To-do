@@ -1,13 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:to_do/models/task.dart'; // Import Task model instead of TaskList
-import 'package:to_do/viewmodels/task_view_model.dart'; // NEW: Import TaskViewModel
+import 'package:to_do/models/task.dart';
+import 'package:to_do/viewmodels/task_view_model.dart';
 import 'package:to_do/viewmodels/theme_view_model.dart';
 import 'package:to_do/utils/app_themes.dart';
-import 'package:to_do/utils/dialog_utils.dart'; // Still used for common dialog patterns, will be adapted
+import 'package:to_do/utils/dialog_utils.dart';
 import 'package:to_do/views/widgets/custom_bottom_nav_bar.dart';
-import 'package:to_do/views/widgets/task_card.dart'; // NEW: Import TaskCard
-import 'package:flutter_svg/flutter_svg.dart'; // Import for SVG support
+import 'package:to_do/views/widgets/task_card.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 
 class TaskListsScreen extends StatefulWidget {
   const TaskListsScreen({super.key});
@@ -23,13 +23,8 @@ class _TaskListsScreenState extends State<TaskListsScreen> {
     setState(() {
       _selectedTabIndex = index;
       print('Selected tab index: $_selectedTabIndex');
-      // In a real app, this would navigate to different main screens (Index, Calendar, Focus, Profile)
     });
   }
-
-  // NOTE: The dialog functions below are currently for TaskList.
-  // They will be replaced/adapted in WBS Task 2.2 for Task-specific dialogs.
-  // For now, the FAB will trigger a placeholder for adding a task.
 
   @override
   Widget build(BuildContext context) {
@@ -39,18 +34,16 @@ class _TaskListsScreenState extends State<TaskListsScreen> {
     final themeViewModel = Provider.of<ThemeViewModel>(context);
 
     final bool isBottomNavVisible = true;
-    final double bottomContentPadding =
-        MediaQuery.of(context).viewInsets.bottom +
-        (isBottomNavVisible
-            ? kBottomNavigationBarHeight + AppDimens.cardMargin
-            : AppDimens.screenPadding);
+    final double bottomContentPadding = MediaQuery.of(context).viewInsets.bottom +
+        (isBottomNavVisible ? kBottomNavigationBarHeight + AppDimens.cardMargin : AppDimens.screenPadding);
+
 
     return Scaffold(
       resizeToAvoidBottomInset: true,
       backgroundColor: colorScheme.background,
       appBar: AppBar(
         title: Text(
-          'Tasks', // Changed title to reflect displaying tasks
+          'Tasks',
           style: textTheme.titleLarge?.copyWith(color: colorScheme.onPrimary),
         ),
         backgroundColor: colorScheme.primary,
@@ -73,24 +66,42 @@ class _TaskListsScreenState extends State<TaskListsScreen> {
             },
             tooltip: 'Toggle Theme',
           ),
-          IconButton(
-            icon: Icon(
-              Icons.brightness_auto,
-              color: theme.appBarTheme.foregroundColor,
+          // MODIFIED: Replaced IconButton with a circular image
+          Padding(
+            padding: const EdgeInsets.only(right: AppDimens.screenPadding / 2),
+            child: GestureDetector(
+              onTap: () {
+                // Currently set to do nothing, as requested.
+                print('Circular image button pressed (no action taken).');
+              },
+              child: Tooltip(
+                message: 'User Profile', // Changed tooltip message
+                child: CircleAvatar(
+                  radius: AppDimens.iconSize / 1.5, // Adjust size as needed
+                  backgroundColor: colorScheme.surface, // Background of the circle
+                  child: ClipOval(
+                    child: Image.network(
+                      "https://placehold.co/50x50/cccccc/000000?text=P", // Placeholder image, 'P' for Profile
+                      width: AppDimens.iconSize * 1.2, // Slightly larger than radius for fill
+                      height: AppDimens.iconSize * 1.2,
+                      fit: BoxFit.cover, // Cover the circular area
+                      errorBuilder: (context, error, stackTrace) => Icon(
+                        Icons.person, // Fallback to person icon on error
+                        color: theme.appBarTheme.foregroundColor,
+                        size: AppDimens.iconSize,
+                      ),
+                    ),
+                  ),
+                ),
+              ),
             ),
-            onPressed: () {
-              // themeViewModel.setThemeMode(ThemeModeType.system);
-            },
-            tooltip: 'System Theme',
           ),
           SizedBox(width: AppDimens.screenPadding / 2),
         ],
       ),
-      // CHANGED: Consumer now listens to TaskViewModel
       body: Consumer<TaskViewModel>(
         builder: (context, taskViewModel, child) {
           if (taskViewModel.tasks.isEmpty) {
-            // Check taskViewModel.tasks
             return SafeArea(
               child: Padding(
                 padding: EdgeInsets.only(
@@ -114,25 +125,19 @@ class _TaskListsScreenState extends State<TaskListsScreen> {
                       SizedBox(height: AppDimens.screenPadding),
                       Text(
                         "What do you want to do today?",
-                        style: textTheme.headlineMedium?.copyWith(
-                          color: colorScheme.onBackground,
-                        ),
+                        style: theme.textTheme.headlineMedium?.copyWith(color: theme.colorScheme.onBackground),
                         textAlign: TextAlign.center,
                       ),
                       SizedBox(height: AppDimens.cardMargin),
                       Text(
                         "Tap + to add your tasks",
-                        style: textTheme.bodyLarge?.copyWith(
-                          color: colorScheme.onBackground.withOpacity(0.7),
-                        ),
+                        style: theme.textTheme.bodyLarge?.copyWith(color: theme.colorScheme.onBackground.withOpacity(0.7)),
                         textAlign: TextAlign.center,
                       ),
                       SizedBox(height: AppDimens.screenPadding),
                       Text(
                         'Your tasks will appear here.',
-                        style: textTheme.bodyMedium?.copyWith(
-                          color: colorScheme.onSurface.withOpacity(0.6),
-                        ),
+                        style: theme.textTheme.bodyMedium?.copyWith(color: theme.colorScheme.onSurface.withOpacity(0.6)),
                         textAlign: TextAlign.center,
                       ),
                       const Spacer(flex: 2),
@@ -142,7 +147,6 @@ class _TaskListsScreenState extends State<TaskListsScreen> {
               ),
             );
           } else {
-            // Display actual tasks when tasks are present
             return SafeArea(
               child: SingleChildScrollView(
                 padding: EdgeInsets.only(
@@ -158,21 +162,16 @@ class _TaskListsScreenState extends State<TaskListsScreen> {
                       shrinkWrap: true,
                       physics: const NeverScrollableScrollPhysics(),
                       itemCount: taskViewModel.tasks.length,
-                      // Iterate over tasks
                       itemBuilder: (context, index) {
-                        final task =
-                            taskViewModel.tasks[index]; // Get a Task object
+                        final task = taskViewModel.tasks[index];
                         return TaskCard(
-                          // Using the new TaskCard widget here
                           task: task,
                           onToggleComplete: () {
-                            // Call TaskViewModel to toggle completion
                             taskViewModel.toggleTaskCompletion(task.id);
                           },
                           onTap: () {
                             print('Tapped on Task: ${task.title}');
                             // TODO: Implement navigation to Task Details/Edit Screen for this individual task
-                            // This will be part of WBS Task 2.2
                           },
                         );
                       },
@@ -186,15 +185,10 @@ class _TaskListsScreenState extends State<TaskListsScreen> {
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () {
-          // TODO: This will be updated in WBS Task 2.2 to show a full Task form dialog.
-          // For now, let's add a dummy task to demonstrate.
-          final taskViewModel = Provider.of<TaskViewModel>(
-            context,
-            listen: false,
-          );
+          final taskViewModel = Provider.of<TaskViewModel>(context, listen: false);
           taskViewModel.addTask(
             title: 'New Task ${taskViewModel.tasks.length + 1}',
-            taskListId: 'default_list_id', // Using a dummy ID for now
+            taskListId: 'default_list_id',
             dueDateTime: DateTime.now().add(const Duration(days: 1)),
             priority: 'medium',
           );
@@ -204,6 +198,7 @@ class _TaskListsScreenState extends State<TaskListsScreen> {
                 'Dummy task added!',
                 style: TextStyle(color: colorScheme.onPrimary),
               ),
+              backgroundColor: colorScheme.surface,
               behavior: SnackBarBehavior.floating,
             ),
           );
@@ -214,11 +209,6 @@ class _TaskListsScreenState extends State<TaskListsScreen> {
         foregroundColor: colorScheme.onPrimary,
         child: const Icon(Icons.add),
         shape: const CircleBorder(),
-      ),
-      bottomNavigationBar: CustomBottomNavBar(
-        isVisible: isBottomNavVisible,
-        currentIndex: _selectedTabIndex,
-        onTap: _onTabTapped,
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
     );
