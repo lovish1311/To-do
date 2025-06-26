@@ -117,9 +117,9 @@ class _TaskListsScreenState extends State<TaskListsScreen> {
                       const Spacer(flex: 1),
                       SvgPicture.asset(
                         "assets/images/img_checklist.svg",
-                        width: MediaQuery.of(context).size.width * 0.7,
-                        height: MediaQuery.of(context).size.width * 0.7,
-                        fit: BoxFit.contain,
+                        width: MediaQuery.of(context).size.width * 0.5,
+                        height: MediaQuery.of(context).size.width * 0.5,
+                        fit: BoxFit.cover,
                       ),
                       SizedBox(height: AppDimens.screenPadding),
                       Text(
@@ -181,33 +181,33 @@ class _TaskListsScreenState extends State<TaskListsScreen> {
           }
         },
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          final taskViewModel = Provider.of<TaskViewModel>(context, listen: false);
-          taskViewModel.addTask(
-            title: 'New Task ${taskViewModel.tasks.length + 1}',
-            taskListId: 'default_list_id',
-            dueDateTime: DateTime.now().add(const Duration(days: 1)),
-            priority: 'medium',
-          );
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text(
-                'Dummy task added!',
-                style: TextStyle(color: colorScheme.onPrimary),
-              ),
-              backgroundColor: colorScheme.surface,
-              behavior: SnackBarBehavior.floating,
-            ),
-          );
-          print('Add new Task FAB pressed (dummy add)');
-        },
-        tooltip: 'Add Task',
-        backgroundColor: colorScheme.primary,
-        foregroundColor: colorScheme.onPrimary,
-        child: const Icon(Icons.add),
-        shape: const CircleBorder(),
-      ),
+      // floatingActionButton: FloatingActionButton(
+      //   onPressed: () {
+      //     final taskViewModel = Provider.of<TaskViewModel>(context, listen: false);
+      //     taskViewModel.addTask(
+      //       title: 'New Task ${taskViewModel.tasks.length + 1}',
+      //       taskListId: 'default_list_id',
+      //       dueDateTime: DateTime.now().add(const Duration(days: 1)),
+      //       priority: 'medium',
+      //     );
+      //     ScaffoldMessenger.of(context).showSnackBar(
+      //       SnackBar(
+      //         content: Text(
+      //           'Dummy task added!',
+      //           style: TextStyle(color: colorScheme.onPrimary),
+      //         ),
+      //         backgroundColor: colorScheme.surface,
+      //         behavior: SnackBarBehavior.floating,
+      //       ),
+      //     );
+      //     print('Add new Task FAB pressed (dummy add)');
+      //   },
+      //   tooltip: 'Add Task',
+      //   backgroundColor: colorScheme.primary,
+      //   foregroundColor: colorScheme.onPrimary,
+      //   child: const Icon(Icons.add),
+      //   shape: const CircleBorder(),
+      // ),
       bottomNavigationBar: CustomBottomNavBar( // Ensure this widget is called
         isVisible: isBottomNavVisible, // Ensure this is true
         currentIndex: _selectedTabIndex,

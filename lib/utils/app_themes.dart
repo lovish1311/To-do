@@ -215,4 +215,6 @@ class AppDimens {
   static const double iconSize = 24.0;
   static const double listItemPadding = 16.0;
   static const double listItemVerticalPadding = 8.0;
+  static const double fabSize = 64.0; // Adjust as desired
+  static const double fabIconSize = 32.0;
 }
