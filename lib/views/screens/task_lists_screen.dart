@@ -33,7 +33,7 @@ class _TaskListsScreenState extends State<TaskListsScreen> {
     final textTheme = theme.textTheme;
     final themeViewModel = Provider.of<ThemeViewModel>(context);
 
-    final bool isBottomNavVisible = true;
+    final bool isBottomNavVisible = true; // Set to true to always show the bottom nav bar
     final double bottomContentPadding = MediaQuery.of(context).viewInsets.bottom +
         (isBottomNavVisible ? kBottomNavigationBarHeight + AppDimens.cardMargin : AppDimens.screenPadding);
 
@@ -56,6 +56,7 @@ class _TaskListsScreenState extends State<TaskListsScreen> {
                   ? Icons.light_mode
                   : Icons.dark_mode,
               color: theme.appBarTheme.foregroundColor,
+              size: AppDimens.iconSize * 1.2,
             ),
             onPressed: () {
               themeViewModel.setThemeMode(
@@ -66,27 +67,26 @@ class _TaskListsScreenState extends State<TaskListsScreen> {
             },
             tooltip: 'Toggle Theme',
           ),
-          // MODIFIED: Replaced IconButton with a circular image
+          SizedBox(width: AppDimens.screenPadding), // Dynamic spacing
           Padding(
-            padding: const EdgeInsets.only(right: AppDimens.screenPadding / 2),
+            padding: const EdgeInsets.only(right: AppDimens.screenPadding), // Increased right padding
             child: GestureDetector(
               onTap: () {
-                // Currently set to do nothing, as requested.
                 print('Circular image button pressed (no action taken).');
               },
               child: Tooltip(
-                message: 'User Profile', // Changed tooltip message
+                message: 'User Profile',
                 child: CircleAvatar(
-                  radius: AppDimens.iconSize / 1.5, // Adjust size as needed
-                  backgroundColor: colorScheme.surface, // Background of the circle
+                  radius: AppDimens.iconSize / 1.5,
+                  backgroundColor: colorScheme.surface,
                   child: ClipOval(
                     child: Image.network(
-                      "https://placehold.co/50x50/cccccc/000000?text=P", // Placeholder image, 'P' for Profile
-                      width: AppDimens.iconSize * 1.2, // Slightly larger than radius for fill
+                      "https://placehold.co/50x50/cccccc/000000?text=P",
+                      width: AppDimens.iconSize * 1.2,
                       height: AppDimens.iconSize * 1.2,
-                      fit: BoxFit.cover, // Cover the circular area
+                      fit: BoxFit.cover,
                       errorBuilder: (context, error, stackTrace) => Icon(
-                        Icons.person, // Fallback to person icon on error
+                        Icons.person,
                         color: theme.appBarTheme.foregroundColor,
                         size: AppDimens.iconSize,
                       ),
@@ -96,7 +96,6 @@ class _TaskListsScreenState extends State<TaskListsScreen> {
               ),
             ),
           ),
-          SizedBox(width: AppDimens.screenPadding / 2),
         ],
       ),
       body: Consumer<TaskViewModel>(
@@ -118,8 +117,8 @@ class _TaskListsScreenState extends State<TaskListsScreen> {
                       const Spacer(flex: 1),
                       SvgPicture.asset(
                         "assets/images/img_checklist.svg",
-                        width: MediaQuery.of(context).size.width * 0.6,
-                        height: MediaQuery.of(context).size.width * 0.6,
+                        width: MediaQuery.of(context).size.width * 0.7,
+                        height: MediaQuery.of(context).size.width * 0.7,
                         fit: BoxFit.contain,
                       ),
                       SizedBox(height: AppDimens.screenPadding),
@@ -171,7 +170,6 @@ class _TaskListsScreenState extends State<TaskListsScreen> {
                           },
                           onTap: () {
                             print('Tapped on Task: ${task.title}');
-                            // TODO: Implement navigation to Task Details/Edit Screen for this individual task
                           },
                         );
                       },
@@ -209,6 +207,11 @@ class _TaskListsScreenState extends State<TaskListsScreen> {
         foregroundColor: colorScheme.onPrimary,
         child: const Icon(Icons.add),
         shape: const CircleBorder(),
+      ),
+      bottomNavigationBar: CustomBottomNavBar( // Ensure this widget is called
+        isVisible: isBottomNavVisible, // Ensure this is true
+        currentIndex: _selectedTabIndex,
+        onTap: _onTabTapped,
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
     );
