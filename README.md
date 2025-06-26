@@ -82,7 +82,7 @@ c. An IDE (VS Code with Flutter extension or Android Studio)
 Installation Steps
 Clone the repository:
 
-git clone https://github.com/your-username/to-do-app.git
+git clone https://github.com/lovish1311/to-do-app.git
 cd to-do-app
 
 Fetch dependencies:
