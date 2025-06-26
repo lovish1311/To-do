@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:to_do/models/task_list.dart';
-import 'package:to_do/viewmodels/task_list_view_model.dart';
+import 'package:to_do/models/task.dart'; // Import Task model instead of TaskList
+import 'package:to_do/viewmodels/task_view_model.dart'; // NEW: Import TaskViewModel
 import 'package:to_do/viewmodels/theme_view_model.dart';
 import 'package:to_do/utils/app_themes.dart';
-import 'package:to_do/utils/dialog_utils.dart';
-import 'package:to_do/views/widgets/custom_bottom_nav_bar.dart'; // Import CustomBottomNavBar
-import 'package:to_do/views/widgets/task_list_item.dart'; // Import the new TaskListItem widget
+import 'package:to_do/utils/dialog_utils.dart'; // Still used for common dialog patterns, will be adapted
+import 'package:to_do/views/widgets/custom_bottom_nav_bar.dart';
+import 'package:to_do/views/widgets/task_card.dart'; // NEW: Import TaskCard
 import 'package:flutter_svg/flutter_svg.dart'; // Import for SVG support
 
 class TaskListsScreen extends StatefulWidget {
@@ -17,15 +17,19 @@ class TaskListsScreen extends StatefulWidget {
 }
 
 class _TaskListsScreenState extends State<TaskListsScreen> {
-  int _selectedTabIndex = 0; // Keeping track of the selected tab for future navigation
+  int _selectedTabIndex = 0;
 
   void _onTabTapped(int index) {
     setState(() {
       _selectedTabIndex = index;
-      // In a real app, you would navigate to different screens here
       print('Selected tab index: $_selectedTabIndex');
+      // In a real app, this would navigate to different main screens (Index, Calendar, Focus, Profile)
     });
   }
+
+  // NOTE: The dialog functions below are currently for TaskList.
+  // They will be replaced/adapted in WBS Task 2.2 for Task-specific dialogs.
+  // For now, the FAB will trigger a placeholder for adding a task.
 
   @override
   Widget build(BuildContext context) {
@@ -34,18 +38,19 @@ class _TaskListsScreenState extends State<TaskListsScreen> {
     final textTheme = theme.textTheme;
     final themeViewModel = Provider.of<ThemeViewModel>(context);
 
-    // Determine the dynamic bottom padding for the scrollable content.
     final bool isBottomNavVisible = true;
-    final double bottomContentPadding = MediaQuery.of(context).viewInsets.bottom +
-        (isBottomNavVisible ? kBottomNavigationBarHeight + AppDimens.cardMargin : AppDimens.screenPadding);
-
+    final double bottomContentPadding =
+        MediaQuery.of(context).viewInsets.bottom +
+        (isBottomNavVisible
+            ? kBottomNavigationBarHeight + AppDimens.cardMargin
+            : AppDimens.screenPadding);
 
     return Scaffold(
       resizeToAvoidBottomInset: true,
       backgroundColor: colorScheme.background,
       appBar: AppBar(
         title: Text(
-          'Index',
+          'Tasks', // Changed title to reflect displaying tasks
           style: textTheme.titleLarge?.copyWith(color: colorScheme.onPrimary),
         ),
         backgroundColor: colorScheme.primary,
@@ -74,16 +79,18 @@ class _TaskListsScreenState extends State<TaskListsScreen> {
               color: theme.appBarTheme.foregroundColor,
             ),
             onPressed: () {
-              themeViewModel.setThemeMode(ThemeModeType.system);
+              // themeViewModel.setThemeMode(ThemeModeType.system);
             },
             tooltip: 'System Theme',
           ),
           SizedBox(width: AppDimens.screenPadding / 2),
         ],
       ),
-      body: Consumer<TaskListViewModel>(
-        builder: (context, taskListViewModel, child) {
-          if (taskListViewModel.taskLists.isEmpty) {
+      // CHANGED: Consumer now listens to TaskViewModel
+      body: Consumer<TaskViewModel>(
+        builder: (context, taskViewModel, child) {
+          if (taskViewModel.tasks.isEmpty) {
+            // Check taskViewModel.tasks
             return SafeArea(
               child: Padding(
                 padding: EdgeInsets.only(
@@ -99,7 +106,7 @@ class _TaskListsScreenState extends State<TaskListsScreen> {
                     children: [
                       const Spacer(flex: 1),
                       SvgPicture.asset(
-                        "assets/images/img_checklist.svg", // Path to your SVG asset
+                        "assets/images/img_checklist.svg",
                         width: MediaQuery.of(context).size.width * 0.6,
                         height: MediaQuery.of(context).size.width * 0.6,
                         fit: BoxFit.contain,
@@ -107,19 +114,25 @@ class _TaskListsScreenState extends State<TaskListsScreen> {
                       SizedBox(height: AppDimens.screenPadding),
                       Text(
                         "What do you want to do today?",
-                        style: textTheme.headlineMedium?.copyWith(color: colorScheme.onBackground),
+                        style: textTheme.headlineMedium?.copyWith(
+                          color: colorScheme.onBackground,
+                        ),
                         textAlign: TextAlign.center,
                       ),
                       SizedBox(height: AppDimens.cardMargin),
                       Text(
                         "Tap + to add your tasks",
-                        style: textTheme.bodyLarge?.copyWith(color: colorScheme.onBackground.withOpacity(0.7)),
+                        style: textTheme.bodyLarge?.copyWith(
+                          color: colorScheme.onBackground.withOpacity(0.7),
+                        ),
                         textAlign: TextAlign.center,
                       ),
                       SizedBox(height: AppDimens.screenPadding),
                       Text(
                         'Your tasks will appear here.',
-                        style: textTheme.bodyMedium?.copyWith(color: colorScheme.onSurface.withOpacity(0.6)),
+                        style: textTheme.bodyMedium?.copyWith(
+                          color: colorScheme.onSurface.withOpacity(0.6),
+                        ),
                         textAlign: TextAlign.center,
                       ),
                       const Spacer(flex: 2),
@@ -129,6 +142,7 @@ class _TaskListsScreenState extends State<TaskListsScreen> {
               ),
             );
           } else {
+            // Display actual tasks when tasks are present
             return SafeArea(
               child: SingleChildScrollView(
                 padding: EdgeInsets.only(
@@ -143,21 +157,22 @@ class _TaskListsScreenState extends State<TaskListsScreen> {
                     ListView.builder(
                       shrinkWrap: true,
                       physics: const NeverScrollableScrollPhysics(),
-                      itemCount: taskListViewModel.taskLists.length,
+                      itemCount: taskViewModel.tasks.length,
+                      // Iterate over tasks
                       itemBuilder: (context, index) {
-                        final taskList = taskListViewModel.taskLists[index];
-                        return TaskListItem( // Using the new TaskListItem widget here
-                          taskList: taskList,
-                          onEdit: () {
-                            DialogUtils.showTaskListFormDialog(context, taskList: taskList);
-                          },
-                          onDelete: () {
-                            // Pass taskListViewModel to the dialog for direct deletion access
-                            DialogUtils.showDeleteConfirmationDialog(context, taskListViewModel, taskList);
+                        final task =
+                            taskViewModel.tasks[index]; // Get a Task object
+                        return TaskCard(
+                          // Using the new TaskCard widget here
+                          task: task,
+                          onToggleComplete: () {
+                            // Call TaskViewModel to toggle completion
+                            taskViewModel.toggleTaskCompletion(task.id);
                           },
                           onTap: () {
-                            print('Tapped on ${taskList.name}');
-                            // TODO: Navigate to Task Details Screen for this taskList
+                            print('Tapped on Task: ${task.title}');
+                            // TODO: Implement navigation to Task Details/Edit Screen for this individual task
+                            // This will be part of WBS Task 2.2
                           },
                         );
                       },
@@ -171,12 +186,34 @@ class _TaskListsScreenState extends State<TaskListsScreen> {
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () {
-          DialogUtils.showTaskListFormDialog(context);
+          // TODO: This will be updated in WBS Task 2.2 to show a full Task form dialog.
+          // For now, let's add a dummy task to demonstrate.
+          final taskViewModel = Provider.of<TaskViewModel>(
+            context,
+            listen: false,
+          );
+          taskViewModel.addTask(
+            title: 'New Task ${taskViewModel.tasks.length + 1}',
+            taskListId: 'default_list_id', // Using a dummy ID for now
+            dueDateTime: DateTime.now().add(const Duration(days: 1)),
+            priority: 'medium',
+          );
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(
+                'Dummy task added!',
+                style: TextStyle(color: colorScheme.onPrimary),
+              ),
+              behavior: SnackBarBehavior.floating,
+            ),
+          );
+          print('Add new Task FAB pressed (dummy add)');
         },
-        tooltip: 'Add Task List',
+        tooltip: 'Add Task',
         backgroundColor: colorScheme.primary,
         foregroundColor: colorScheme.onPrimary,
         child: const Icon(Icons.add),
+        shape: const CircleBorder(),
       ),
       bottomNavigationBar: CustomBottomNavBar(
         isVisible: isBottomNavVisible,

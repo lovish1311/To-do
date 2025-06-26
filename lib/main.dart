@@ -1,13 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:path_provider/path_provider.dart';
-import 'package:provider/provider.dart'; // <--- ADD THIS IMPORT
-import 'package:to_do/models/task_list.dart';
-import 'package:to_do/services/task_list_service.dart'; // <--- ADD THIS IMPORT
-import 'package:to_do/viewmodels/task_list_view_model.dart'; // <--- ADD THIS IMPORT
-import 'package:to_do/utils/constants.dart'; // For AppConstants
+import 'package:provider/provider.dart';
+
+import 'package:to_do/models/task_list.dart'; // Provides TaskListAdapter
+import 'package:to_do/models/task.dart'; // NEW: Import Task model
+import 'package:to_do/services/task_list_service.dart';
+import 'package:to_do/services/task_service.dart'; // NEW: Import TaskService
+import 'package:to_do/viewmodels/task_list_view_model.dart';
+import 'package:to_do/viewmodels/task_view_model.dart';
 import 'package:to_do/viewmodels/theme_view_model.dart';
-import 'package:to_do/views/screens/task_lists_screen.dart'; // <--- ADD THIS IMPORT
+import 'package:to_do/utils/constants.dart';
+import 'package:to_do/utils/app_themes.dart';
+import 'package:to_do/views/screens/task_lists_screen.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -15,23 +20,31 @@ void main() async {
   final appDocumentDirectory = await getApplicationDocumentsDirectory();
   Hive.init(appDocumentDirectory.path);
 
+  // Register adapters for both TaskList and Task models
   Hive.registerAdapter(TaskListAdapter());
+  Hive.registerAdapter(TaskAdapter()); // NEW: Register TaskAdapter
 
-  await Hive.openBox<TaskList>(AppConstants.taskListBox); // Use constant
-  await Hive.openBox(AppConstants.taskBox); // Use constant
+  // Open the Hive boxes using constants
+  await Hive.openBox<TaskList>(AppConstants.taskListBox);
+  await Hive.openBox<Task>(AppConstants.taskBox); // UPDATED: Open Task box with <Task> type
 
-  // Initialize the TaskListService
+  // Initialize both services
   final taskListService = TaskListService();
+  final taskService = TaskService(); // NEW: Initialize TaskService
 
   runApp(
-    // Wrap MyApp with ChangeNotifierProvider to make TaskListViewModel available
     MultiProvider(
       providers: [
         ChangeNotifierProvider(
-          create: (context) =>
-              TaskListViewModel(taskListService), // Pass the service
+          create: (context) => TaskListViewModel(taskListService),
         ),
-        ChangeNotifierProvider(create: (context) => ThemeViewModel()),
+        ChangeNotifierProvider(
+          create: (context) => ThemeViewModel(),
+        ),
+        // NEW: Provider for TaskViewModel
+        ChangeNotifierProvider(
+          create: (context) => TaskViewModel(taskService), // Pass the new taskService
+        ),
       ],
       child: const MyApp(),
     ),
@@ -43,15 +56,16 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'To-Do App',
-      theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.blue),
-        useMaterial3: true,
-      ),
-      // Set the home to TaskListsScreen
-      home:
-          const TaskListsScreen(), // Now TaskListsScreen will have access to the ViewModel
+    return Consumer<ThemeViewModel>(
+      builder: (context, themeViewModel, child) {
+        return MaterialApp(
+          title: 'To-Do App',
+          theme: AppThemes.lightTheme(),
+          darkTheme: AppThemes.darkTheme(),
+          themeMode: themeViewModel.flutterThemeMode,
+          home: const TaskListsScreen(),
+        );
+      },
     );
   }
 }

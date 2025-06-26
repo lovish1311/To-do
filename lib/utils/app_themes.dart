@@ -19,7 +19,8 @@ class AppColorsLight {
 
 // Dark Mode Colors
 class AppColorsDark {
-  static const Color primaryColor = Colors.blueGrey; // A different primary for dark mode
+  static const Color primaryColor = Color(0xFF5856D6); // A different primary for dark mode
+  // static const Color primaryColor = Colors.blueGrey; // A different primary for dark mode
   static const Color accentColor = Colors.cyan;
   static const Color textColor = Colors.white;
   static const Color subTextColor = Colors.grey;
