@@ -6,6 +6,7 @@ import 'package:to_do/models/task_list.dart';
 import 'package:to_do/services/task_list_service.dart'; // <--- ADD THIS IMPORT
 import 'package:to_do/viewmodels/task_list_view_model.dart'; // <--- ADD THIS IMPORT
 import 'package:to_do/utils/constants.dart'; // For AppConstants
+import 'package:to_do/viewmodels/theme_view_model.dart';
 import 'package:to_do/views/screens/task_lists_screen.dart'; // <--- ADD THIS IMPORT
 
 void main() async {
@@ -24,8 +25,14 @@ void main() async {
 
   runApp(
     // Wrap MyApp with ChangeNotifierProvider to make TaskListViewModel available
-    ChangeNotifierProvider(
-      create: (context) => TaskListViewModel(taskListService), // Pass the service
+    MultiProvider(
+      providers: [
+        ChangeNotifierProvider(
+          create: (context) =>
+              TaskListViewModel(taskListService), // Pass the service
+        ),
+        ChangeNotifierProvider(create: (context) => ThemeViewModel()),
+      ],
       child: const MyApp(),
     ),
   );
@@ -43,7 +50,8 @@ class MyApp extends StatelessWidget {
         useMaterial3: true,
       ),
       // Set the home to TaskListsScreen
-      home: const TaskListsScreen(), // Now TaskListsScreen will have access to the ViewModel
+      home:
+          const TaskListsScreen(), // Now TaskListsScreen will have access to the ViewModel
     );
   }
 }

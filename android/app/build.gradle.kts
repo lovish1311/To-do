@@ -8,11 +8,12 @@ plugins {
 android {
     namespace = "com.example.to_do"
     compileSdk = flutter.compileSdkVersion
-    ndkVersion = flutter.ndkVersion
+    ndkVersion = "27.0.12077973"
 
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_11
         targetCompatibility = JavaVersion.VERSION_11
+        isCoreLibraryDesugaringEnabled = true
     }
 
     kotlinOptions {
@@ -37,6 +38,16 @@ android {
             signingConfig = signingConfigs.getByName("debug")
         }
     }
+}
+// ... (your existing code, including the android { ... } and flutter { ... } blocks)
+
+dependencies {
+    // This line is often already present for Flutter projects
+    // Keep it if it's there, otherwise it might not be strictly necessary for this error
+
+
+    // REQUIRED for core library desugaring
+    coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:2.0.4")
 }
 
 flutter {
