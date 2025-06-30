@@ -19,8 +19,7 @@ class AppColorsLight {
 
 // Dark Mode Colors
 class AppColorsDark {
-  static const Color primaryColor = Color(0xFF5856D6); // A different primary for dark mode
-  // static const Color primaryColor = Colors.blueGrey; // A different primary for dark mode
+  static const Color primaryColor = Colors.blueGrey; // A different primary for dark mode
   static const Color accentColor = Colors.cyan;
   static const Color textColor = Colors.white;
   static const Color subTextColor = Colors.grey;
@@ -35,37 +34,29 @@ class AppColorsDark {
 // The fontFamily is removed to use default Material Design font,
 // allowing system-wide font changes or Material 3 defaults to apply.
 class AppTextStyles {
-  // static const String fontFamily = 'Inter'; // Removed to use default system font
-
   static const TextStyle headlineLarge = TextStyle(
     fontSize: 32.0,
     fontWeight: FontWeight.bold,
-    // fontFamily: fontFamily, // Removed
   );
   static const TextStyle headlineMedium = TextStyle(
     fontSize: 24.0,
     fontWeight: FontWeight.bold,
-    // fontFamily: fontFamily, // Removed
   );
   static const TextStyle titleLarge = TextStyle(
     fontSize: 20.0,
     fontWeight: FontWeight.w600,
-    // fontFamily: fontFamily, // Removed
   );
   static const TextStyle bodyLarge = TextStyle(
     fontSize: 16.0,
     fontWeight: FontWeight.normal,
-    // fontFamily: fontFamily, // Removed
   );
   static const TextStyle bodyMedium = TextStyle(
     fontSize: 14.0,
     fontWeight: FontWeight.normal,
-    // fontFamily: fontFamily, // Removed
   );
   static const TextStyle bodySmall = TextStyle(
     fontSize: 12.0,
     fontWeight: FontWeight.normal,
-    // fontFamily: fontFamily, // Removed
   );
 }
 
@@ -114,11 +105,11 @@ class AppThemes {
         backgroundColor: AppColorsLight.primaryColor,
         foregroundColor: Colors.white,
       ),
-      // For this project, we'll primarily use `TextButton` so let's define that.
+      // CORRECTED: TextButtonThemeData needs style property with ButtonStyle
       textButtonTheme: TextButtonThemeData(
         style: TextButton.styleFrom(
           foregroundColor: AppColorsLight.primaryColor, // Default text color for text buttons
-          textStyle: AppTextStyles.bodyMedium,
+          textStyle: AppTextStyles.bodyMedium, // Use TextStyle here
         ),
       ),
       cardTheme: CardThemeData(
@@ -129,8 +120,7 @@ class AppThemes {
       listTileTheme: ListTileThemeData(
         textColor: AppColorsLight.textColor,
       ),
-      // Corrected: Use DialogThemeData for dialogTheme property
-      dialogTheme: DialogThemeData( // Changed from DialogTheme to DialogThemeData
+      dialogTheme: DialogThemeData(
         backgroundColor: AppColorsLight.backgroundColor,
         titleTextStyle: AppTextStyles.titleLarge.copyWith(color: AppColorsLight.textColor),
         contentTextStyle: AppTextStyles.bodyMedium.copyWith(color: AppColorsLight.textColor),
@@ -183,7 +173,7 @@ class AppThemes {
       textButtonTheme: TextButtonThemeData(
         style: TextButton.styleFrom(
           foregroundColor: AppColorsDark.primaryColor,
-          textStyle: AppTextStyles.bodyMedium,
+          textStyle: AppTextStyles.bodyMedium, // Use TextStyle here
         ),
       ),
       cardTheme: CardThemeData(
@@ -194,7 +184,7 @@ class AppThemes {
       listTileTheme: ListTileThemeData(
         textColor: AppColorsDark.textColor,
       ),
-      dialogTheme: DialogThemeData( // Changed from DialogTheme to DialogThemeData
+      dialogTheme: DialogThemeData(
         backgroundColor: AppColorsDark.backgroundColor,
         titleTextStyle: AppTextStyles.titleLarge.copyWith(color: AppColorsDark.textColor),
         contentTextStyle: AppTextStyles.bodyMedium.copyWith(color: AppColorsDark.textColor),
@@ -215,6 +205,8 @@ class AppDimens {
   static const double iconSize = 24.0;
   static const double listItemPadding = 16.0;
   static const double listItemVerticalPadding = 8.0;
-  static const double fabSize = 64.0; // Adjust as desired
-  static const double fabIconSize = 32.0;
+
+  // FAB Dimensions
+  static const double fabSize = 60.0; // Diameter of the FAB
+  static const double fabIconSize = 28.0; // Size of the icon inside the FAB
 }
