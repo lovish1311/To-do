@@ -60,17 +60,34 @@ class CustomBottomNavBar extends StatelessWidget {
       return const SizedBox.shrink();
     }
 
-    // FAB should stick out half its height
-    final double fabOffset = -(AppDimens.fabSize*1.18);
+    // How much of the FAB should visually protrude above the BottomAppBar.
+    // For "half inside, half outside", this should be exactly half of the FAB's height.
+    final double fabProtrusionAmount = AppDimens.fabSize / 2;
     final double bottomBarHeight = kBottomNavigationBarHeight;
 
-    return Container(
-      height: bottomBarHeight, // Keep fixed height
+    // Calculate the total height this CustomBottomNavBar widget will occupy.
+    // This is the standard BottomAppBar height PLUS the portion of the FAB
+    // that sticks out upwards. This height is crucial for the Scaffold's body padding.
+    final double totalHeightWithFabProtrusion = bottomBarHeight + fabProtrusionAmount;
+
+    // Calculate the y-offset for Transform.translate.
+    // The Align(alignment: Alignment.topCenter) places the FAB's top at the top of the Stack.
+    // To make it half-in and half-out, the FAB's *bottom edge* should be precisely
+    // at the *top edge* of the BottomAppBar.
+    // The top edge of the BottomAppBar is at `totalHeightWithFabProtrusion - bottomBarHeight`
+    // from the top of the Stack.
+    // The FAB's top edge (when translated) needs to be at this position minus its own height.
+    // Or, more simply: The FAB needs to be shifted upwards by half its height.
+    final double fabTranslateYOffset = -fabProtrusionAmount; // Negative to move upwards
+
+
+    return SizedBox( // Use SizedBox to explicitly define the height of the bottom nav bar area
+      height: totalHeightWithFabProtrusion, // Corrected: This Container now reports its true height
       child: Stack(
-        alignment: Alignment.bottomCenter,
-        clipBehavior: Clip.none, // Allow FAB to protrude
+        alignment: Alignment.bottomCenter, // Align children to the bottom center
+        clipBehavior: Clip.none, // Crucial: Allows children (FAB) to paint outside the Stack's bounds
         children: [
-          // BottomAppBar
+          // The BottomAppBar itself, positioned at the very bottom of the Stack
           Positioned(
             left: 0,
             right: 0,
@@ -78,15 +95,18 @@ class CustomBottomNavBar extends StatelessWidget {
             child: BottomAppBar(
               color: colorScheme.surface,
               elevation: AppDimens.cardElevation,
-              shape: const CircularNotchedRectangle(),
+              shape: const CircularNotchedRectangle(), // Creates the notch for the FAB
               child: SizedBox(
-                height: bottomBarHeight,
+                height: bottomBarHeight, // Height for the internal Row
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceAround,
                   children: [
                     _buildBottomNavItem(Icons.assignment, 'Index', theme, currentIndex == 0, 0),
                     _buildBottomNavItem(Icons.calendar_today, 'Calendar', theme, currentIndex == 1, 1),
-                    SizedBox(width: kMinInteractiveDimension + AppDimens.cardMargin), // FAB gap
+                    // HERE IS THE FLOATING ACTION BUTTON SPACE
+                    // This SizedBox creates the horizontal space in the Row for the FAB.
+                    // Its width should be at least the FAB's diameter plus some margin.
+                    SizedBox(width: AppDimens.fabSize + AppDimens.cardMargin),
                     _buildBottomNavItem(Icons.timer, 'Focus', theme, currentIndex == 2, 2),
                     _buildBottomNavItem(Icons.person, 'Profile', theme, currentIndex == 3, 3),
                   ],
@@ -96,21 +116,24 @@ class CustomBottomNavBar extends StatelessWidget {
           ),
           // Centered Floating Action Button
           Align(
-            alignment: Alignment.topCenter,
+            alignment: Alignment.topCenter, // Align to the top of the stack, then translate down
             child: Transform.translate(
-              offset: Offset(0, fabOffset),
+              // Apply the negative Y offset to move the FAB upwards.
+              // This is the "offset property" you were looking for.
+              // This correctly positions the FAB for the "half inside, half outside" effect.
+              offset: Offset(0, fabTranslateYOffset),
               child: SizedBox(
-                width: AppDimens.fabSize,
-                height: AppDimens.fabSize,
+                width: AppDimens.fabSize, // Explicitly set FAB width
+                height: AppDimens.fabSize, // Explicitly set FAB height
                 child: FloatingActionButton(
-                  onPressed: onFabPressed,
+                  onPressed: onFabPressed, // Use the provided callback
                   tooltip: 'Add Task',
                   backgroundColor: colorScheme.primary,
                   foregroundColor: colorScheme.onPrimary,
-                  shape: const CircleBorder(),
+                  shape: const CircleBorder(), // Keep it circular
                   child: Icon(
                     Icons.add,
-                    size: AppDimens.fabIconSize,
+                    size: AppDimens.fabIconSize, // Use custom FAB icon size
                   ),
                 ),
               ),
