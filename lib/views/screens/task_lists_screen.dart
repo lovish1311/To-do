@@ -7,6 +7,8 @@ import 'package:to_do/utils/app_themes.dart';
 import 'package:to_do/utils/dialog_utils.dart';
 import 'package:to_do/views/widgets/custom_bottom_nav_bar.dart';
 import 'package:to_do/views/widgets/task_card.dart';
+import 'package:to_do/views/widgets/completed_tasks_section.dart';
+import 'package:to_do/views/screens/task_detail_screen.dart'; // NEW: Import TaskDetailScreen
 import 'package:flutter_svg/flutter_svg.dart';
 
 class TaskListsScreen extends StatefulWidget {
@@ -27,14 +29,13 @@ class _TaskListsScreenState extends State<TaskListsScreen> {
   }
 
   void _onAddFabPressed(BuildContext context) {
-    final taskViewModel = Provider.of<TaskViewModel>(context, listen: false);
-    taskViewModel.addTask(
-      title: 'New Task ${taskViewModel.tasks.length + 1}',
-      taskListId: 'default_list_id',
-      dueDateTime: DateTime.now().add(const Duration(days: 1)),
-      priority: 'medium',
+    // Navigate to TaskDetailScreen to add a new task
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (context) => const TaskDetailScreen(), // No task passed for new creation
+      ),
     );
-    print('Add new Task FAB pressed (dummy add). Task card should appear.');
+    print('Navigating to TaskDetailScreen to add a new task.');
   }
 
   @override
@@ -48,15 +49,13 @@ class _TaskListsScreenState extends State<TaskListsScreen> {
 
     // Calculate the total height of the CustomBottomNavBar including FAB protrusion.
     // This must precisely match the 'totalHeightWithFabProtrusion' calculated in CustomBottomNavBar.
-    // The FAB's protrusion amount (how much it sticks out above the BottomAppBar) is AppDimens.fabSize / 2.
-    final double customBottomNavBarTotalHeight = kBottomNavigationBarHeight + (AppDimens.fabSize / 2);
-
+    final double customBottomNavBarTotalHeight = kBottomNavigationBarHeight + (AppDimens.fabSize / 2 + 4);
 
     // The bottom padding for the body content.
     // This ensures the scrollable content clears the entire bottom navigation area,
     // including the FAB that is half-out.
     final double bottomContentPadding = MediaQuery.of(context).viewInsets.bottom +
-        (isBottomNavVisible ? customBottomNavBarTotalHeight: AppDimens.screenPadding);
+        (isBottomNavVisible ? customBottomNavBarTotalHeight + AppDimens.cardMargin : AppDimens.screenPadding);
 
 
     return Scaffold(
@@ -121,6 +120,9 @@ class _TaskListsScreenState extends State<TaskListsScreen> {
       ),
       body: Consumer<TaskViewModel>(
         builder: (context, taskViewModel, child) {
+          final List<Task> activeTasks = taskViewModel.activeTasks;
+          final List<Task> completedTasks = taskViewModel.completedTasks;
+
           return SingleChildScrollView(
             padding: EdgeInsets.only(
               left: AppDimens.screenPadding,
@@ -130,10 +132,10 @@ class _TaskListsScreenState extends State<TaskListsScreen> {
             ),
             child: Center(
               child: Column(
-                mainAxisAlignment: taskViewModel.tasks.isEmpty ? MainAxisAlignment.center : MainAxisAlignment.start,
+                mainAxisAlignment: activeTasks.isEmpty && completedTasks.isEmpty ? MainAxisAlignment.center : MainAxisAlignment.start,
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
-                  if (taskViewModel.tasks.isEmpty) ...[
+                  if (activeTasks.isEmpty && completedTasks.isEmpty) ...[
                     SvgPicture.asset(
                       "assets/images/img_checklist.svg",
                       width: MediaQuery.of(context).size.shortestSide * 0.5,
@@ -159,21 +161,31 @@ class _TaskListsScreenState extends State<TaskListsScreen> {
                       textAlign: TextAlign.center,
                     ),
                   ] else ...[
-                    ListView.builder(
-                      shrinkWrap: true,
-                      physics: const NeverScrollableScrollPhysics(),
-                      itemCount: taskViewModel.tasks.length,
-                      itemBuilder: (context, index) {
-                        final task = taskViewModel.tasks[index];
-                        return TaskCard(
-                          task: task,
-                          onToggleComplete: () {
-                            taskViewModel.toggleTaskCompletion(task.id);
-                          },
-                          onTap: () {
-                            print('Tapped on Task: ${task.title}');
-                          },
-                        );
+                    if (activeTasks.isNotEmpty)
+                      ListView.builder(
+                        shrinkWrap: true,
+                        physics: const NeverScrollableScrollPhysics(),
+                        itemCount: activeTasks.length,
+                        itemBuilder: (context, index) {
+                          final task = activeTasks[index];
+                          return TaskCard(
+                            task: task,
+                            onToggleComplete: () {
+                              taskViewModel.toggleTaskCompletion(task.id);
+                            },
+                            onTap: () {
+                              print('Tapped on Active Task: ${task.title}');
+                              // TODO: Implement navigation to Task Details/Edit Screen
+                            },
+                          );
+                        },
+                      ),
+                    if (activeTasks.isNotEmpty && completedTasks.isNotEmpty)
+                      SizedBox(height: AppDimens.screenPadding),
+                    CompletedTasksSection(
+                      completedTasks: completedTasks,
+                      onToggleComplete: (taskId) {
+                        taskViewModel.toggleTaskCompletion(taskId);
                       },
                     ),
                   ],

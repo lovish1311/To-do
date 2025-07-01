@@ -74,7 +74,7 @@ class CustomBottomNavBar extends StatelessWidget {
     // The Align(alignment: Alignment.topCenter) places the FAB's top at the top of the Stack.
     // To make it half-in and half-out, the FAB's *top edge* should be at
     // `totalHeightWithFabProtrusion - AppDimens.fabSize`.
-    final double fabTranslateYOffset = totalHeightWithFabProtrusion - AppDimens.fabSize;
+    final double fabTranslateYOffset = -(AppDimens.fabSize / 2);
 
 
     return SizedBox( // Use SizedBox to explicitly define the height of the bottom nav bar area
@@ -111,29 +111,28 @@ class CustomBottomNavBar extends StatelessWidget {
             ),
           ),
           // Centered Floating Action Button
-          Align(
-            alignment: Alignment.topCenter, // Align to the top of the stack
-            child: Transform.translate(
-              // Apply the Y offset to move the FAB to its correct position.
-              // This positions the FAB for the "half inside, half outside" effect.
-              offset: Offset(0, fabTranslateYOffset),
-              child: SizedBox(
-                width: AppDimens.fabSize, // Explicitly set FAB width
-                height: AppDimens.fabSize, // Explicitly set FAB height
-                child: FloatingActionButton(
-                  onPressed: onFabPressed, // Use the provided callback
-                  tooltip: 'Add Task',
-                  backgroundColor: colorScheme.primary,
-                  foregroundColor: colorScheme.onPrimary,
-                  shape: const CircleBorder(), // Keep it circular
-                  child: Icon(
-                    Icons.add,
-                    size: AppDimens.fabIconSize, // Use custom FAB icon size
-                  ),
-                ),
+      Align(
+        alignment: Alignment.topCenter,
+        child: Transform.translate(
+          offset: Offset(0, -(AppDimens.fabSize / 2+4)), // <- THIS IS THE FIX
+          child: SizedBox(
+            width: AppDimens.fabSize,
+            height: AppDimens.fabSize,
+            child: FloatingActionButton(
+              onPressed: onFabPressed,
+              tooltip: 'Add Task',
+              backgroundColor: colorScheme.primary,
+              foregroundColor: colorScheme.onPrimary,
+              shape: const CircleBorder(),
+              child: Icon(
+                Icons.add,
+                size: AppDimens.fabIconSize,
               ),
             ),
           ),
+        ),
+      ),
+
         ],
       ),
     );

@@ -70,6 +70,43 @@ class Task extends HiveObject {
     this.wishTaskCompletionStatus,
   });
 
+  /// Creates a new [Task] instance with updated values.
+  /// This is a common pattern for immutable classes to allow "modifications"
+  /// by creating a new instance with desired changes.
+  Task copyWith({
+    String? id,
+    String? title,
+    String? description,
+    bool? isCompleted,
+    DateTime? createdAt,
+    String? taskListId,
+    DateTime? dueDateTime,
+    bool? isRecurring,
+    String? recurrencePattern,
+    String? priority,
+    List<String>? subtasks,
+    bool? isWishTask,
+    DateTime? wishTaskDeadline,
+    String? wishTaskCompletionStatus,
+  }) {
+    return Task(
+      id: id ?? this.id,
+      title: title ?? this.title,
+      description: description ?? this.description,
+      isCompleted: isCompleted ?? this.isCompleted,
+      createdAt: createdAt ?? this.createdAt,
+      taskListId: taskListId ?? this.taskListId,
+      dueDateTime: dueDateTime ?? this.dueDateTime,
+      isRecurring: isRecurring ?? this.isRecurring,
+      recurrencePattern: recurrencePattern ?? this.recurrencePattern,
+      priority: priority ?? this.priority,
+      subtasks: subtasks ?? this.subtasks,
+      isWishTask: isWishTask ?? this.isWishTask,
+      wishTaskDeadline: wishTaskDeadline ?? this.wishTaskDeadline,
+      wishTaskCompletionStatus: wishTaskCompletionStatus ?? this.wishTaskCompletionStatus,
+    );
+  }
+
   // Optional: A toString method for easy debugging
   @override
   String toString() {

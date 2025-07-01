@@ -10,13 +10,18 @@ class TaskViewModel extends ChangeNotifier {
   // Instance of TaskService to interact with the Hive database for Tasks.
   final TaskService _taskService;
 
-  // Private list to hold Task objects. This is the "state" managed by the ViewModel.
-  // This list will typically contain tasks filtered for a specific TaskList,
-  // or all tasks if we choose to display them globally.
+  // Private list to hold ALL Task objects fetched from the service.
   List<Task> _tasks = [];
 
-  // Public getter to expose the list of Tasks to the UI.
+  // Public getter to expose ALL tasks (active and completed) to the UI.
   List<Task> get tasks => _tasks;
+
+  // NEW: Getter for active (incomplete) tasks.
+  List<Task> get activeTasks => _tasks.where((task) => !task.isCompleted).toList();
+
+  // NEW: Getter for completed tasks, sorted by completion date or creation date.
+  List<Task> get completedTasks => _tasks.where((task) => task.isCompleted).toList()
+    ..sort((a, b) => (b.dueDateTime ?? b.createdAt).compareTo(a.dueDateTime ?? a.createdAt)); // Sort by due date or creation date
 
   // Uuid instance for generating unique IDs for new tasks.
   final Uuid _uuid = const Uuid();
@@ -25,24 +30,18 @@ class TaskViewModel extends ChangeNotifier {
   /// It requires an instance of TaskService (dependency injection).
   TaskViewModel(this._taskService) {
     // When the ViewModel is created, we'll start listening to the entire
-    // tasks box for any changes. Filtering for a specific task list will
-    // be done in the _fetchTasks method.
+    // tasks box for any changes.
     _taskService.tasksBoxListenable('').addListener(_fetchTasks);
-    // Initially fetch all tasks (or tasks for a default list if one exists)
-    // When no task list is active, this will fetch all tasks.
-    // We will refine this later when navigating between TaskLists.
+    // Initially fetch all tasks.
     _fetchTasks();
   }
 
   /// Fetches tasks from the service and updates the ViewModel's state.
-  /// Currently, this fetches all tasks. We'll adjust it to filter by taskListId
-  /// when we implement navigation from TaskListsScreen to TaskDetailsScreen.
+  /// This now fetches ALL tasks, and the getters filter them.
   void _fetchTasks() {
-    // For now, we're assuming a "global" view of all tasks if no specific taskListId is provided.
-    // When we navigate from a TaskList, this method will be adapted to take a taskListId.
-    _tasks = _taskService.readTasks(''); // Pass an empty string for now, to read all tasks.
+    _tasks = _taskService.readTasks(''); // Read all tasks
     notifyListeners(); // Notify all listening widgets that the data has changed.
-    print('ViewModel: Fetched ${_tasks.length} tasks.'); // For debugging
+    print('ViewModel: Fetched ${_tasks.length} tasks (Active: ${activeTasks.length}, Completed: ${completedTasks.length}).'); // For debugging
   }
 
   /// Adds a new task.
@@ -56,7 +55,7 @@ class TaskViewModel extends ChangeNotifier {
     bool isWishTask = false,
     DateTime? wishTaskDeadline,
   }) async {
-    try { // Encapsulated in try-catch as per requirement
+    try {
       final newTask = Task(
         id: _uuid.v4(),
         title: title,
@@ -65,65 +64,57 @@ class TaskViewModel extends ChangeNotifier {
         createdAt: DateTime.now(),
         taskListId: taskListId,
         dueDateTime: dueDateTime,
-        isRecurring: false, // Default new tasks to not recurring
+        isRecurring: false,
         recurrencePattern: null,
         priority: priority,
         subtasks: subtasks,
         isWishTask: isWishTask,
         wishTaskDeadline: wishTaskDeadline,
-        wishTaskCompletionStatus: null, // Default
+        wishTaskCompletionStatus: null,
       );
       await _taskService.createTask(newTask);
-      // UI update handled by the listenable automatically
       print('ViewModel: Attempted to add task: $title');
     } catch (e) {
       print('ViewModel: Error adding task: $e');
-      // Optionally show a user-friendly message or log to a crash reporting tool
     }
   }
 
   /// Toggles the completion status of a task.
+  /// This method now only updates the task, it does NOT delete it.
   Future<void> toggleTaskCompletion(String taskId) async {
-    try { // Encapsulated in try-catch as per requirement
+    try {
       final taskToUpdate = _tasks.firstWhere((task) => task.id == taskId);
       taskToUpdate.isCompleted = !taskToUpdate.isCompleted; // Flip the status
-      await _taskService.updateTask(taskToUpdate);
+      await _taskService.updateTask(taskToUpdate); // Update the task in storage
       print('ViewModel: Toggled completion for task ID: $taskId to ${taskToUpdate.isCompleted}');
     } catch (e) {
       print('ViewModel: Error toggling task completion for ID $taskId: $e');
-      // Optionally show a user-friendly message
     }
   }
 
   /// Updates an existing task.
   Future<void> updateTask(Task updatedTask) async {
-    try { // Encapsulated in try-catch as per requirement
-      // The updatedTask object already contains the new values.
+    try {
       await _taskService.updateTask(updatedTask);
       print('ViewModel: Attempted to update task: ${updatedTask.title}');
     } catch (e) {
       print('ViewModel: Error updating task ${updatedTask.title}: $e');
-      // Optionally show a user-friendly message
     }
   }
 
-  /// Deletes a task.
+  /// Deletes a task. (This method is kept for explicit deletion, but not used on completion toggle anymore)
   Future<void> deleteTask(String taskId) async {
-    try { // Encapsulated in try-catch as per requirement
+    try {
       await _taskService.deleteTask(taskId);
       print('ViewModel: Attempted to delete task with ID: $taskId');
     } catch (e) {
       print('ViewModel: Error deleting task with ID $taskId: $e');
-      // Optionally show a user-friendly message
     }
   }
 
   /// Cleans up resources when the ViewModel is no longer needed.
   @override
   void dispose() {
-    // Remove the listener to _taskService's box updates to prevent memory leaks.
-    // The `listenable()` method requires a `taskListId` parameter for the specific listener,
-    // so we call it with the same parameter as in the constructor.
     _taskService.tasksBoxListenable('').removeListener(_fetchTasks);
     super.dispose();
     print('ViewModel: TaskViewModel disposed.');
