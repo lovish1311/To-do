@@ -37,6 +37,14 @@ class _TaskListsScreenState extends State<TaskListsScreen> {
     );
     print('Navigating to TaskDetailScreen to add a new task.');
   }
+  void _navigateToEditTask(BuildContext context, Task task) {
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (context) => TaskDetailScreen(task: task), // Pass the existing task
+      ),
+    );
+    print('Navigating to TaskDetailScreen to edit task: ${task.title}');
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -173,10 +181,7 @@ class _TaskListsScreenState extends State<TaskListsScreen> {
                             onToggleComplete: () {
                               taskViewModel.toggleTaskCompletion(task.id);
                             },
-                            onTap: () {
-                              print('Tapped on Active Task: ${task.title}');
-                              // TODO: Implement navigation to Task Details/Edit Screen
-                            },
+                            onTap: () => _navigateToEditTask(context, task), // Navigate to edit
                           );
                         },
                       ),
@@ -186,7 +191,7 @@ class _TaskListsScreenState extends State<TaskListsScreen> {
                       completedTasks: completedTasks,
                       onToggleComplete: (taskId) {
                         taskViewModel.toggleTaskCompletion(taskId);
-                      },
+                      }, onTapTask: (task)=> _navigateToEditTask(context, task),
                     ),
                   ],
                 ],
