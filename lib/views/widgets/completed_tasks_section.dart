@@ -1,18 +1,20 @@
 import 'package:flutter/material.dart';
 import 'package:to_do/models/task.dart';
 import 'package:to_do/utils/app_themes.dart';
-import 'package:to_do/views/widgets/task_card.dart'; // Assuming TaskCard is used for completed tasks too
+import 'package:to_do/views/widgets/task_card.dart';
 
 /// A collapsible section to display completed tasks.
 /// It shows a header with a count and an arrow, and expands to reveal the list of tasks.
 class CompletedTasksSection extends StatefulWidget {
   final List<Task> completedTasks; // List of completed tasks to display
   final ValueChanged<String> onToggleComplete; // Callback to toggle task completion
+  final ValueChanged<Task> onTapTask; // NEW: Callback when a task card is tapped
 
   const CompletedTasksSection({
     super.key,
     required this.completedTasks,
     required this.onToggleComplete,
+    required this.onTapTask, // Initialize new callback
   });
 
   @override
@@ -73,10 +75,7 @@ class _CompletedTasksSectionState extends State<CompletedTasksSection> {
               return TaskCard(
                 task: task,
                 onToggleComplete: () => widget.onToggleComplete(task.id),
-                onTap: () {
-                  print('Tapped on completed task: ${task.title}');
-                  // TODO: Implement navigation to Task Details/Edit Screen
-                },
+                onTap: () => widget.onTapTask(task), // Pass task to new callback
               );
             },
           ),
