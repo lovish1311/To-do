@@ -199,12 +199,13 @@ class AppThemes {
 // This file can be expanded with more layout constants as needed.
 class AppDimens {
   static const double screenPadding = 16.0;
-  static const double cardMargin = 8.0;
+  static const double cardMargin = 12.0; // Margin between cards
+  static const double cardInternalVerticalPadding = 16.0; // NEW: Vertical padding INSIDE the card
   static const double cardElevation = 4.0;
   static const double cardBorderRadius = 10.0;
   static const double iconSize = 24.0;
-  static const double listItemPadding = 16.0;
-  static const double listItemVerticalPadding = 8.0;
+  static const double listItemPadding = 16.0; // Horizontal padding for list items
+  static const double listItemVerticalPadding = 8.0; // Vertical padding for list items (will be replaced by cardInternalVerticalPadding)
 
   // FAB Dimensions
   static const double fabSize = 60.0; // Diameter of the FAB

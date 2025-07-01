@@ -60,8 +60,8 @@ class CustomBottomNavBar extends StatelessWidget {
       return const SizedBox.shrink();
     }
 
-    // How much of the FAB should visually protrude above the BottomAppBar.
-    // For "half inside, half outside", this should be exactly half of the FAB's height.
+    // The desired amount the FAB should visually protrude above the BottomAppBar.
+    // For "half inside, half outside", this is exactly half of the FAB's height.
     final double fabProtrusionAmount = AppDimens.fabSize / 2;
     final double bottomBarHeight = kBottomNavigationBarHeight;
 
@@ -72,17 +72,13 @@ class CustomBottomNavBar extends StatelessWidget {
 
     // Calculate the y-offset for Transform.translate.
     // The Align(alignment: Alignment.topCenter) places the FAB's top at the top of the Stack.
-    // To make it half-in and half-out, the FAB's *bottom edge* should be precisely
-    // at the *top edge* of the BottomAppBar.
-    // The top edge of the BottomAppBar is at `totalHeightWithFabProtrusion - bottomBarHeight`
-    // from the top of the Stack.
-    // The FAB's top edge (when translated) needs to be at this position minus its own height.
-    // Or, more simply: The FAB needs to be shifted upwards by half its height.
-    final double fabTranslateYOffset = -fabProtrusionAmount; // Negative to move upwards
+    // To make it half-in and half-out, the FAB's *top edge* should be at
+    // `totalHeightWithFabProtrusion - AppDimens.fabSize`.
+    final double fabTranslateYOffset = totalHeightWithFabProtrusion - AppDimens.fabSize;
 
 
     return SizedBox( // Use SizedBox to explicitly define the height of the bottom nav bar area
-      height: totalHeightWithFabProtrusion, // Corrected: This Container now reports its true height
+      height: totalHeightWithFabProtrusion, // Corrected: This now reports its true visual height
       child: Stack(
         alignment: Alignment.bottomCenter, // Align children to the bottom center
         clipBehavior: Clip.none, // Crucial: Allows children (FAB) to paint outside the Stack's bounds
@@ -116,11 +112,10 @@ class CustomBottomNavBar extends StatelessWidget {
           ),
           // Centered Floating Action Button
           Align(
-            alignment: Alignment.topCenter, // Align to the top of the stack, then translate down
+            alignment: Alignment.topCenter, // Align to the top of the stack
             child: Transform.translate(
-              // Apply the negative Y offset to move the FAB upwards.
-              // This is the "offset property" you were looking for.
-              // This correctly positions the FAB for the "half inside, half outside" effect.
+              // Apply the Y offset to move the FAB to its correct position.
+              // This positions the FAB for the "half inside, half outside" effect.
               offset: Offset(0, fabTranslateYOffset),
               child: SizedBox(
                 width: AppDimens.fabSize, // Explicitly set FAB width

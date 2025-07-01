@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:to_do/models/task.dart'; // Import Task model
-import 'package:to_do/viewmodels/task_view_model.dart'; // Import TaskViewModel
+import 'package:to_do/models/task.dart';
+import 'package:to_do/viewmodels/task_view_model.dart';
 import 'package:to_do/viewmodels/theme_view_model.dart';
 import 'package:to_do/utils/app_themes.dart';
-import 'package:to_do/utils/dialog_utils.dart'; // Still needed if you use other dialogs, but not for task add/edit now
+import 'package:to_do/utils/dialog_utils.dart';
 import 'package:to_do/views/widgets/custom_bottom_nav_bar.dart';
-import 'package:to_do/views/widgets/task_card.dart'; // Import TaskCard
+import 'package:to_do/views/widgets/task_card.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
 class TaskListsScreen extends StatefulWidget {
@@ -26,26 +26,15 @@ class _TaskListsScreenState extends State<TaskListsScreen> {
     });
   }
 
-  // Method to handle adding a dummy task (called by FAB)
   void _onAddFabPressed(BuildContext context) {
     final taskViewModel = Provider.of<TaskViewModel>(context, listen: false);
     taskViewModel.addTask(
       title: 'New Task ${taskViewModel.tasks.length + 1}',
-      taskListId: 'default_list_id', // Assuming a default task list ID for now
+      taskListId: 'default_list_id',
       dueDateTime: DateTime.now().add(const Duration(days: 1)),
       priority: 'medium',
     );
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(
-          'Dummy task added!',
-          style: TextStyle(color: Theme.of(context).colorScheme.onPrimary),
-        ),
-        backgroundColor: Theme.of(context).colorScheme.surface,
-        behavior: SnackBarBehavior.floating,
-      ),
-    );
-    print('Add new Task FAB pressed (dummy add)');
+    print('Add new Task FAB pressed (dummy add). Task card should appear.');
   }
 
   @override
@@ -58,15 +47,16 @@ class _TaskListsScreenState extends State<TaskListsScreen> {
     final bool isBottomNavVisible = true;
 
     // Calculate the total height of the CustomBottomNavBar including FAB protrusion.
-    // This must precisely match the calculation in CustomBottomNavBar.
+    // This must precisely match the 'totalHeightWithFabProtrusion' calculated in CustomBottomNavBar.
     // The FAB's protrusion amount (how much it sticks out above the BottomAppBar) is AppDimens.fabSize / 2.
     final double customBottomNavBarTotalHeight = kBottomNavigationBarHeight + (AppDimens.fabSize / 2);
+
 
     // The bottom padding for the body content.
     // This ensures the scrollable content clears the entire bottom navigation area,
     // including the FAB that is half-out.
     final double bottomContentPadding = MediaQuery.of(context).viewInsets.bottom +
-        (isBottomNavVisible ? customBottomNavBarTotalHeight + AppDimens.cardMargin : AppDimens.screenPadding);
+        (isBottomNavVisible ? customBottomNavBarTotalHeight: AppDimens.screenPadding);
 
 
     return Scaffold(
@@ -74,7 +64,7 @@ class _TaskListsScreenState extends State<TaskListsScreen> {
       backgroundColor: colorScheme.background,
       appBar: AppBar(
         title: Text(
-          'Tasks', // Changed from 'Index' to 'Tasks' for clarity
+          'Tasks',
           style: textTheme.titleLarge?.copyWith(color: colorScheme.onPrimary),
         ),
         backgroundColor: colorScheme.primary,
@@ -129,7 +119,6 @@ class _TaskListsScreenState extends State<TaskListsScreen> {
           ),
         ],
       ),
-      // Changed Consumer to TaskViewModel
       body: Consumer<TaskViewModel>(
         builder: (context, taskViewModel, child) {
           return SingleChildScrollView(
@@ -170,21 +159,19 @@ class _TaskListsScreenState extends State<TaskListsScreen> {
                       textAlign: TextAlign.center,
                     ),
                   ] else ...[
-                    // Displaying TaskCard for each Task
                     ListView.builder(
                       shrinkWrap: true,
                       physics: const NeverScrollableScrollPhysics(),
                       itemCount: taskViewModel.tasks.length,
                       itemBuilder: (context, index) {
                         final task = taskViewModel.tasks[index];
-                        return TaskCard( // Using TaskCard here
+                        return TaskCard(
                           task: task,
                           onToggleComplete: () {
                             taskViewModel.toggleTaskCompletion(task.id);
                           },
                           onTap: () {
                             print('Tapped on Task: ${task.title}');
-                            // TODO: Implement navigation to Task Details/Edit Screen
                           },
                         );
                       },
@@ -196,13 +183,13 @@ class _TaskListsScreenState extends State<TaskListsScreen> {
           );
         },
       ),
-      floatingActionButton: null, // FAB managed by CustomBottomNavBar
-      floatingActionButtonLocation: null, // FAB managed by CustomBottomNavBar
+      floatingActionButton: null,
+      floatingActionButtonLocation: null,
       bottomNavigationBar: CustomBottomNavBar(
         isVisible: isBottomNavVisible,
         currentIndex: _selectedTabIndex,
         onTap: _onTabTapped,
-        onFabPressed: () => _onAddFabPressed(context), // Pass FAB press logic
+        onFabPressed: () => _onAddFabPressed(context),
       ),
     );
   }

@@ -2,18 +2,18 @@ import 'package:flutter/material.dart';
 import 'package:to_do/models/task.dart'; // Import the Task model
 import 'package:to_do/utils/app_themes.dart'; // For AppDimens and theme colors
 
-/// A reusable widget to display a single Task item.
-/// It features a completion marker, task title, due time, and priority tag.
+/// A reusable widget to display a single task.
+/// It shows the task's title, completion status, and provides callbacks for interactions.
 class TaskCard extends StatelessWidget {
   final Task task; // The Task object to display
-  final VoidCallback onToggleComplete; // Callback for when the completion marker is tapped
-  final VoidCallback onTap; // Callback for when the entire card is tapped
+  final VoidCallback? onToggleComplete; // Callback when the completion status is toggled
+  final VoidCallback? onTap; // Callback when the card itself is tapped (e.g., for details)
 
   const TaskCard({
     super.key,
     required this.task,
-    required this.onToggleComplete,
-    required this.onTap,
+    this.onToggleComplete,
+    this.onTap,
   });
 
   @override
@@ -22,88 +22,101 @@ class TaskCard extends StatelessWidget {
     final colorScheme = theme.colorScheme;
     final textTheme = theme.textTheme;
 
-    return GestureDetector( // GestureDetector for the whole card tap
-      onTap: onTap,
-      child: Container(
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(AppDimens.cardBorderRadius), // Use theme radius
-          color: colorScheme.surface, // Use theme surface color
-        ),
-        padding: const EdgeInsets.symmetric(vertical: AppDimens.listItemVerticalPadding, horizontal: AppDimens.listItemPadding),
-        margin: const EdgeInsets.only(bottom: AppDimens.cardMargin * 2, left: AppDimens.screenPadding, right: AppDimens.screenPadding),
-        width: double.infinity, // Take full width
-        child: Row(
-          crossAxisAlignment: CrossAxisAlignment.start, // Align content to the top
-          children: [
-            // --- Completion Marker (Circle) ---
-            GestureDetector(
-              onTap: onToggleComplete, // Toggle complete status on tap
-              child: Container(
-                margin: const EdgeInsets.only(right: AppDimens.listItemPadding / 2),
-                width: AppDimens.iconSize, // Consistent icon size
-                height: AppDimens.iconSize,
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle, // Make it a circle
-                  color: task.isCompleted ? colorScheme.primary : colorScheme.surface, // Filled blue if complete, else black
-                  border: Border.all(
-                    color: task.isCompleted ? colorScheme.primary : colorScheme.onSurface, // Blue border if complete, else black
-                    width: 1.5,
-                  ),
-                ),
-                child: Center(
-                  child: task.isCompleted
-                      ? Icon(Icons.check, color: colorScheme.onPrimary, size: AppDimens.iconSize * 0.7) // White checkmark if complete
-                      : Container( // Unfilled state - black outer circle, white inner
-                    width: AppDimens.iconSize - 6, // Smaller inner circle
-                    height: AppDimens.iconSize - 6,
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      color: colorScheme.background, // Inner white circle for unfilled
+    return Card(
+      margin: const EdgeInsets.only(bottom: AppDimens.cardMargin), // Consistent bottom margin between cards
+      elevation: AppDimens.cardElevation, // Consistent card elevation
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(AppDimens.cardBorderRadius), // Consistent rounded corners
+      ),
+      color: colorScheme.surface, // Use theme's surface color for the card background
+      child: InkWell( // Use InkWell for visual tap feedback on the entire card
+        onTap: onTap, // Call the provided onTap callback
+        borderRadius: BorderRadius.circular(AppDimens.cardBorderRadius), // Match card border radius
+        child: Padding(
+          padding: const EdgeInsets.symmetric(
+            horizontal: AppDimens.listItemPadding, // Consistent horizontal padding
+            vertical: AppDimens.cardInternalVerticalPadding, // NEW: Use distinct vertical padding for card content
+          ),
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.start, // Align content to the top
+            children: [
+              // --- Task Completion Marker (Interactive Circle) ---
+              GestureDetector(
+                onTap: onToggleComplete, // Toggle completion on tap
+                child: Container(
+                  width: AppDimens.iconSize, // Consistent size for the marker
+                  height: AppDimens.iconSize,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle, // Make it a perfect circle
+                    color: task.isCompleted ? colorScheme.primary : Colors.transparent, // Blue if complete, transparent otherwise
+                    border: Border.all(
+                      color: task.isCompleted ? colorScheme.primary : colorScheme.onSurface.withOpacity(0.5), // Border color based on completion
+                      width: 2.0, // Thicker border for better visibility
                     ),
                   ),
+                  child: task.isCompleted
+                      ? Icon(Icons.check, color: colorScheme.onPrimary, size: AppDimens.iconSize * 0.7) // White checkmark if completed
+                      : null, // No icon if not completed
                 ),
               ),
-            ),
-            // --- Task Details (Title, Due Time, Priority) ---
-            Expanded( // Takes remaining horizontal space
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start, // Align text to the left
-                children: [
-                  Container(
-                    margin: const EdgeInsets.only(bottom: AppDimens.cardMargin / 2),
-                    child: Text(
+              SizedBox(width: AppDimens.screenPadding), // Spacing between checkbox and title
+
+              // --- Task Details (Title, Due Time, Priority Tag) ---
+              Expanded( // Takes up the remaining horizontal space
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start, // Align text to the left
+                  children: [
+                    Text(
                       task.title,
                       style: textTheme.titleLarge?.copyWith(
-                        color: colorScheme.onSurface, // Text color
+                        color: task.isCompleted ? colorScheme.onSurface.withOpacity(0.6) : colorScheme.onSurface, // Subdued color if completed
                         decoration: task.isCompleted ? TextDecoration.lineThrough : TextDecoration.none, // Strikethrough if complete
                       ),
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
+                      maxLines: 2, // Limit title to 2 lines for compactness
+                      overflow: TextOverflow.ellipsis, // Add ellipsis if text overflows
                     ),
-                  ),
-                  if (task.dueDateTime != null) // Only show if due date exists
-                    Text(
-                      'Due: ${task.dueDateTime!.toLocal().toString().split(' ')[0]} ${task.dueDateTime!.toLocal().hour}:${task.dueDateTime!.toLocal().minute.toString().padLeft(2, '0')}',
-                      style: textTheme.bodySmall?.copyWith(color: colorScheme.onSurface.withOpacity(0.7)), // Grey text
-                    ),
-                  SizedBox(height: AppDimens.cardMargin), // Spacing between text and priority tag
-                  // --- Priority Tag ---
-                  if (task.priority != null) // Only show if priority exists
-                    Container(
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(AppDimens.cardBorderRadius / 2),
-                        color: colorScheme.primary, // Themed blue background
+                    if (task.dueDateTime != null) // Show due date if available
+                      Padding(
+                        padding: const EdgeInsets.only(top: AppDimens.cardMargin / 4), // Small top padding for date
+                        child: Text(
+                          // Format date and time
+                          'Due: ${task.dueDateTime!.toLocal().toString().split(' ')[0]} ${task.dueDateTime!.toLocal().hour}:${task.dueDateTime!.toLocal().minute.toString().padLeft(2, '0')}',
+                          style: textTheme.bodySmall?.copyWith(color: colorScheme.onSurface.withOpacity(0.7)), // Subdued grey text
+                        ),
                       ),
-                      padding: const EdgeInsets.symmetric(horizontal: AppDimens.cardMargin, vertical: AppDimens.cardMargin / 2),
-                      child: Text(
-                        task.priority!.toUpperCase(), // Display priority in uppercase
-                        style: textTheme.bodySmall?.copyWith(color: colorScheme.onPrimary), // White text on primary
+                    // Add a small spacer if there's both a due date and a priority tag
+                    if (task.dueDateTime != null && task.priority != null && task.priority!.isNotEmpty)
+                      SizedBox(height: AppDimens.cardMargin / 2), // Slightly smaller gap
+
+                    // --- Priority Tag ---
+                    if (task.priority != null && task.priority!.isNotEmpty) // Show priority tag only if it exists and is not empty
+                      Container(
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(AppDimens.cardBorderRadius / 2), // Rounded corners for the tag
+                          color: colorScheme.primary.withOpacity(0.1), // Light primary color background for tag
+                        ),
+                        padding: const EdgeInsets.symmetric(horizontal: AppDimens.cardMargin, vertical: AppDimens.cardMargin / 2),
+                        child: Text(
+                          task.priority!.toUpperCase(), // Display priority in uppercase
+                          style: textTheme.bodySmall?.copyWith(
+                            color: colorScheme.primary, // Primary color text for tag
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
                       ),
-                    ),
-                ],
+                  ],
+                ),
               ),
-            ),
-          ],
+
+              // Optional: More actions (e.g., edit icon)
+              // IconButton(
+              //   icon: Icon(Icons.edit, color: colorScheme.onSurface.withOpacity(0.7)),
+              //   onPressed: () {
+              //     // Handle edit action
+              //   },
+              // ),
+            ],
+          ),
         ),
       ),
     );

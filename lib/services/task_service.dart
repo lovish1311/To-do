@@ -1,57 +1,56 @@
 import 'package:flutter/foundation.dart';
 import 'package:hive_flutter/hive_flutter.dart';
-import 'package:to_do/models/task.dart'; // Our Task blueprint
-import 'package:to_do/utils/constants.dart'; // Our app-wide constants (like box names)
+import 'package:to_do/models/task.dart'; // Import the Task model
+import 'package:to_do/utils/constants.dart'; // Import constants for box names
 
-/// Manages saving and loading individual Task data using Hive, our local database.
-/// This service is like a specialized librarian for all your specific tasks.
+/// Manages saving and loading Task data using Hive, our local database.
+/// This service handles the direct interaction with the Hive box for Task objects.
 class TaskService {
-  // This is where we keep a direct link to our 'tasks' box (a storage container for all tasks).
+  // This is where we keep a direct link to our 'tasks' box.
   late final Box<Task> _taskBox;
 
-  /// When the TaskService is created, it grabs the 'tasks' box.
-  /// We assume this box is already open because we set it up in main.dart.
+  /// Constructor for TaskService.
+  /// It assumes the 'tasks' box is already open, as configured in main.dart.
   TaskService() {
-    // We are opening a box of type Task.
+    // Ensure the box is opened with the correct Task type.
     _taskBox = Hive.box<Task>(AppConstants.taskBox);
   }
 
-  // --- Actions our librarian (TaskService) can do with individual tasks ---
-
-  /// Adds a brand new task to our storage.
-  /// If something goes wrong, it'll print a message.
+  /// Adds a new task to the storage.
   Future<void> createTask(Task task) async {
     try {
-      // It uses the task's unique ID as its "key" to store it.
-      // Each task gets its own spot on the shelf, identified by its ID.
+      // Use the task's unique ID as its key for storage.
       await _taskBox.put(task.id, task);
-      print('✅ Task created: ${task.title} for TaskList ID: ${task.taskListId}');
+      print('✅ Task created: ${task.title}');
     } catch (e) {
       print('❌ Error creating Task ${task.title}: $e');
+      // In a real app, you might log this error or show a user-friendly message.
     }
   }
 
-  /// Gets ALL the tasks for a specific task list.
-  /// Returns them as a list.
-  /// We filter the tasks based on the taskListId they belong to.
+  /// Reads tasks from the storage.
+  /// If [taskListId] is empty, it returns all tasks.
+  /// Otherwise, it filters tasks by the specified taskListId.
   List<Task> readTasks(String taskListId) {
-    // Pulls out all values from the task box and then filters them
-    // to only include tasks that belong to the specified taskListId.
-    return _taskBox.values.where((task) => task.taskListId == taskListId).toList();
+    if (taskListId.isEmpty) {
+      // Return all tasks if no specific taskListId is provided.
+      return _taskBox.values.toList();
+    } else {
+      // Filter tasks by taskListId.
+      return _taskBox.values.where((task) => task.taskListId == taskListId).toList();
+    }
   }
 
-  /// Finds a specific task using its unique ID.
-  /// Returns the task if found, otherwise nothing (null).
+  /// Finds a specific task by its unique ID.
+  /// Returns the task if found, otherwise null.
   Task? getTaskById(String id) {
-    // Looks for a specific task by its unique ID.
     return _taskBox.get(id);
   }
 
-  /// Updates an existing task.
-  /// If something goes wrong, it'll print a message.
+  /// Updates an existing task in the storage.
   Future<void> updateTask(Task task) async {
     try {
-      // It finds the task by its ID and replaces it with the updated version.
+      // Update the task in the box using its ID as the key.
       await _taskBox.put(task.id, task);
       print('⬆️ Task updated: ${task.title}');
     } catch (e) {
@@ -59,11 +58,9 @@ class TaskService {
     }
   }
 
-  /// Deletes a task using its unique ID.
-  /// If something goes wrong, it'll print a message.
+  /// Deletes a task from the storage using its unique ID.
   Future<void> deleteTask(String id) async {
     try {
-      // Removes the task with that specific ID from the storage.
       await _taskBox.delete(id);
       print('🗑️ Task deleted with ID: $id');
     } catch (e) {
@@ -71,15 +68,11 @@ class TaskService {
     }
   }
 
-  /// This provides a special alert system specifically for tasks within a given task list.
-  /// If any task (belonging to the specified taskListId) is added, deleted, or updated,
-  /// this system will "ring a bell".
-  /// Our app's display (UI) can "listen" for this bell and update itself
-  /// automatically to show the latest tasks for that specific list.
+  /// Provides a ValueListenable for the entire Task box.
+  /// This allows ViewModels to listen for real-time changes in the underlying data.
+  /// The empty string parameter is a placeholder for potential future filtering,
+  /// but for now, it returns a listener for all tasks in the box.
   ValueListenable<Box<Task>> tasksBoxListenable(String taskListId) {
-    // We return a listenable for the entire Box<Task> and expect the ViewModel
-    // to filter based on taskListId, similar to how readTasks works.
-    // Hive's listenable doesn't directly support filtering by field.
     return _taskBox.listenable();
   }
 }
