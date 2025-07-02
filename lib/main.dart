@@ -12,6 +12,7 @@ import 'package:to_do/viewmodels/task_view_model.dart';
 import 'package:to_do/viewmodels/theme_view_model.dart';
 import 'package:to_do/utils/constants.dart';
 import 'package:to_do/utils/app_themes.dart';
+import 'package:to_do/views/screens/app_shell.dart';
 import 'package:to_do/views/screens/task_lists_screen.dart';
 
 void main() async {
@@ -63,7 +64,7 @@ class MyApp extends StatelessWidget {
           theme: AppThemes.lightTheme(),
           darkTheme: AppThemes.darkTheme(),
           themeMode: themeViewModel.flutterThemeMode,
-          home: const TaskListsScreen(),
+          home: const AppShell(),
         );
       },
     );

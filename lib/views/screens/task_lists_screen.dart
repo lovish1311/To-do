@@ -1,14 +1,15 @@
+// lib/views/screens/task_lists_screen.dart
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:to_do/models/task.dart';
 import 'package:to_do/viewmodels/task_view_model.dart';
-import 'package:to_do/viewmodels/theme_view_model.dart';
+import 'package:to_do/viewmodels/theme_view_model.dart'; // Re-import ThemeViewModel for its AppBar
 import 'package:to_do/utils/app_themes.dart';
-import 'package:to_do/utils/dialog_utils.dart';
-import 'package:to_do/views/widgets/custom_bottom_nav_bar.dart';
+// CustomBottomNavBar is still not used directly here
+// import 'package:to_do/views/widgets/custom_bottom_nav_bar.dart';
 import 'package:to_do/views/widgets/task_card.dart';
 import 'package:to_do/views/widgets/completed_tasks_section.dart';
-import 'package:to_do/views/screens/task_detail_screen.dart'; // NEW: Import TaskDetailScreen
+import 'package:to_do/views/screens/task_detail_screen.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
 class TaskListsScreen extends StatefulWidget {
@@ -19,28 +20,13 @@ class TaskListsScreen extends StatefulWidget {
 }
 
 class _TaskListsScreenState extends State<TaskListsScreen> {
-  int _selectedTabIndex = 0;
+  // _selectedTabIndex and _onTabTapped are moved to AppShell.
 
-  void _onTabTapped(int index) {
-    setState(() {
-      _selectedTabIndex = index;
-      print('Selected tab index: $_selectedTabIndex');
-    });
-  }
-
-  void _onAddFabPressed(BuildContext context) {
-    // Navigate to TaskDetailScreen to add a new task
-    Navigator.of(context).push(
-      MaterialPageRoute(
-        builder: (context) => const TaskDetailScreen(), // No task passed for new creation
-      ),
-    );
-    print('Navigating to TaskDetailScreen to add a new task.');
-  }
   void _navigateToEditTask(BuildContext context, Task task) {
+    // This correctly uses the nested Navigator for navigation within this tab.
     Navigator.of(context).push(
       MaterialPageRoute(
-        builder: (context) => TaskDetailScreen(task: task), // Pass the existing task
+        builder: (context) => TaskDetailScreen(task: task),
       ),
     );
     print('Navigating to TaskDetailScreen to edit task: ${task.title}');
@@ -51,25 +37,24 @@ class _TaskListsScreenState extends State<TaskListsScreen> {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
     final textTheme = theme.textTheme;
-    final themeViewModel = Provider.of<ThemeViewModel>(context);
+    final themeViewModel = Provider.of<ThemeViewModel>(context); // Re-consume ThemeViewModel for AppBar
 
-    final bool isBottomNavVisible = true;
+    // Calculate the height of the CustomBottomNavBar that is _below_ this screen.
+    // This is crucial for content padding to prevent obscuring by the bottom bar.
+    // We assume here that CustomBottomNavBar's structure maintains its overall visual height.
+    // The height of CustomBottomNavBar is kBottomNavigationBarHeight + AppDimens.fabSize / 2.
+    final double customBottomNavBarHeight = kBottomNavigationBarHeight + AppDimens.fabSize / 2;
 
-    // Calculate the total height of the CustomBottomNavBar including FAB protrusion.
-    // This must precisely match the 'totalHeightWithFabProtrusion' calculated in CustomBottomNavBar.
-    final double customBottomNavBarTotalHeight = kBottomNavigationBarHeight + (AppDimens.fabSize / 2 + 4);
-
-    // The bottom padding for the body content.
-    // This ensures the scrollable content clears the entire bottom navigation area,
-    // including the FAB that is half-out.
-    final double bottomContentPadding = MediaQuery.of(context).viewInsets.bottom +
-        (isBottomNavVisible ? customBottomNavBarTotalHeight + AppDimens.cardMargin : AppDimens.screenPadding);
-
+    // Add MediaQuery.of(context).viewPadding.bottom to account for system insets (e.g., safe area for gestures)
+    // and then add the height of your CustomBottomNavBar.
+    final double bottomContentPadding = MediaQuery.of(context).viewPadding.bottom +
+        customBottomNavBarHeight +
+        AppDimens.screenPadding; // Add some extra margin
 
     return Scaffold(
-      resizeToAvoidBottomInset: true,
+      resizeToAvoidBottomInset: true, // Keep this to handle keyboard
       backgroundColor: colorScheme.background,
-      appBar: AppBar(
+      appBar: AppBar( // AppBar restored here
         title: Text(
           'Tasks',
           style: textTheme.titleLarge?.copyWith(color: colorScheme.onPrimary),
@@ -136,11 +121,13 @@ class _TaskListsScreenState extends State<TaskListsScreen> {
               left: AppDimens.screenPadding,
               right: AppDimens.screenPadding,
               top: AppDimens.screenPadding,
-              bottom: bottomContentPadding,
+              bottom: bottomContentPadding, // Use the adjusted padding
             ),
             child: Center(
               child: Column(
-                mainAxisAlignment: activeTasks.isEmpty && completedTasks.isEmpty ? MainAxisAlignment.center : MainAxisAlignment.start,
+                mainAxisAlignment: activeTasks.isEmpty && completedTasks.isEmpty
+                    ? MainAxisAlignment.center
+                    : MainAxisAlignment.start,
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
                   if (activeTasks.isEmpty && completedTasks.isEmpty) ...[
@@ -177,11 +164,7 @@ class _TaskListsScreenState extends State<TaskListsScreen> {
                         itemBuilder: (context, index) {
                           final task = activeTasks[index];
                           return TaskCard(
-                            task: task,
-                            onToggleComplete: () {
-                              taskViewModel.toggleTaskCompletion(task.id);
-                            },
-                            onTap: () => _navigateToEditTask(context, task), // Navigate to edit
+                            task: task
                           );
                         },
                       ),
@@ -191,7 +174,8 @@ class _TaskListsScreenState extends State<TaskListsScreen> {
                       completedTasks: completedTasks,
                       onToggleComplete: (taskId) {
                         taskViewModel.toggleTaskCompletion(taskId);
-                      }, onTapTask: (task)=> _navigateToEditTask(context, task),
+                      },
+                      onTapTask: (task) => _navigateToEditTask(context, task),
                     ),
                   ],
                 ],
@@ -200,14 +184,7 @@ class _TaskListsScreenState extends State<TaskListsScreen> {
           );
         },
       ),
-      floatingActionButton: null,
-      floatingActionButtonLocation: null,
-      bottomNavigationBar: CustomBottomNavBar(
-        isVisible: isBottomNavVisible,
-        currentIndex: _selectedTabIndex,
-        onTap: _onTabTapped,
-        onFabPressed: () => _onAddFabPressed(context),
-      ),
+      // No floatingActionButton or bottomNavigationBar here anymore
     );
   }
 }

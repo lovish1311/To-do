@@ -13,7 +13,6 @@ class ThemeViewModel extends ChangeNotifier {
 
   // Public getter to access the current theme mode.
   ThemeModeType get themeMode => _themeMode;
-
   /// Sets the application's theme mode.
   /// Calls notifyListeners() to inform any listening widgets (like MaterialApp)
   /// to rebuild with the new theme settings.

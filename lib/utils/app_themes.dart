@@ -1,3 +1,4 @@
+// lib/utils/app_themes.dart
 import 'package:flutter/material.dart';
 
 // --- Custom Color Palettes ---
@@ -15,6 +16,7 @@ class AppColorsLight {
   static const Color cardColor = Colors.white;
   static const Color deleteColor = Colors.red;
   static const Color editColor = Colors.blueGrey;
+  static const Color wishTaskColor = Color(0xFF9C27B0); // Deep Purple for Wish Task
 }
 
 // Dark Mode Colors
@@ -25,8 +27,9 @@ class AppColorsDark {
   static const Color subTextColor = Colors.grey;
   static const Color backgroundColor = Color(0xFF121212); // Darker background
   static const Color cardColor = Color(0xFF1E1E1E); // Darker card background
-  static const Color deleteColor = Colors.redAccent;
+  static const Color deleteColor = Colors.redAccent; // More visible red for dark mode
   static const Color editColor = Colors.lightBlue;
+  static const Color wishTaskColor = Color(0xFFCE93D8); // Lighter purple for dark mode contrast
 }
 
 // --- Custom Text Styles ---
@@ -112,15 +115,14 @@ class AppThemes {
           textStyle: AppTextStyles.bodyMedium, // Use TextStyle here
         ),
       ),
-      cardTheme: CardThemeData(
-        color: AppColorsLight.cardColor,
+      cardTheme: CardThemeData( // Reverted to CardThemeData
         elevation: 4.0,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10.0)),
       ),
       listTileTheme: ListTileThemeData(
         textColor: AppColorsLight.textColor,
       ),
-      dialogTheme: DialogThemeData(
+      dialogTheme: DialogThemeData( // Reverted to DialogThemeData
         backgroundColor: AppColorsLight.backgroundColor,
         titleTextStyle: AppTextStyles.titleLarge.copyWith(color: AppColorsLight.textColor),
         contentTextStyle: AppTextStyles.bodyMedium.copyWith(color: AppColorsLight.textColor),
@@ -176,15 +178,14 @@ class AppThemes {
           textStyle: AppTextStyles.bodyMedium, // Use TextStyle here
         ),
       ),
-      cardTheme: CardThemeData(
-        color: AppColorsDark.cardColor,
+      cardTheme: CardThemeData( // Reverted to CardThemeData
         elevation: 4.0,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10.0)),
       ),
       listTileTheme: ListTileThemeData(
         textColor: AppColorsDark.textColor,
       ),
-      dialogTheme: DialogThemeData(
+      dialogTheme: DialogThemeData( // Reverted to DialogThemeData
         backgroundColor: AppColorsDark.backgroundColor,
         titleTextStyle: AppTextStyles.titleLarge.copyWith(color: AppColorsDark.textColor),
         contentTextStyle: AppTextStyles.bodyMedium.copyWith(color: AppColorsDark.textColor),
@@ -200,12 +201,25 @@ class AppThemes {
 class AppDimens {
   static const double screenPadding = 16.0;
   static const double cardMargin = 12.0; // Margin between cards
-  static const double cardInternalVerticalPadding = 16.0; // NEW: Vertical padding INSIDE the card
+  // Adjusted base for internal vertical padding, TaskCard will use a multiplier
+  static const double cardInternalVerticalPadding = 14.0; // Adjusted base (was 16.0)
   static const double cardElevation = 4.0;
   static const double cardBorderRadius = 10.0;
   static const double iconSize = 24.0;
   static const double listItemPadding = 16.0; // Horizontal padding for list items
-  static const double listItemVerticalPadding = 8.0; // Vertical padding for list items (will be replaced by cardInternalVerticalPadding)
+  // static const double listItemVerticalPadding = 8.0; // Vertical padding for list items (will be replaced by cardInternalVerticalPadding)
+
+  // NEW: Granular Spacing Constants for internal card elements
+  static const double extraSmallGap = 2.0; // For very small spacing
+  static const double smallGap = 4.0; // For spacing after dates
+  static const double mediumGap = 6.0; // For spacing above tags/buttons
+  static const double largeGap = 8.0; // General purpose larger gap
+
+  // NEW: Tag specific dimensions
+  static const double tagHorizontalPadding = 10.0; // Padding inside tags horizontally
+  static const double tagVerticalPadding = 4.0; // Padding inside tags vertically
+  static const double tagSpacing = 6.0; // Horizontal space between tags in a Wrap
+  static const double tagRunSpacing = 4.0; // Vertical space if tags wrap
 
   // FAB Dimensions
   static const double fabSize = 60.0; // Diameter of the FAB

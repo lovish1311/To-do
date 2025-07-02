@@ -114,7 +114,7 @@ class CustomBottomNavBar extends StatelessWidget {
       Align(
         alignment: Alignment.topCenter,
         child: Transform.translate(
-          offset: Offset(0, -(AppDimens.fabSize / 2+4)), // <- THIS IS THE FIX
+          offset: Offset(0, -(AppDimens.fabSize / 2)), // <- THIS IS THE FIX
           child: SizedBox(
             width: AppDimens.fabSize,
             height: AppDimens.fabSize,

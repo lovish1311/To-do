@@ -74,8 +74,6 @@ class _CompletedTasksSectionState extends State<CompletedTasksSection> {
               final task = widget.completedTasks[index];
               return TaskCard(
                 task: task,
-                onToggleComplete: () => widget.onToggleComplete(task.id),
-                onTap: () => widget.onTapTask(task), // Pass task to new callback
               );
             },
           ),
