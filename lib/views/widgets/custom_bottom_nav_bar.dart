@@ -2,20 +2,18 @@ import 'package:flutter/material.dart';
 import 'package:to_do/utils/app_themes.dart'; // For AppDimens
 
 /// A customizable and reusable Bottom Navigation Bar widget.
-/// It integrates a Floating Action Button (FAB) directly within its layout,
-/// creating a visually appealing "docked" and slightly offset effect.
+/// This version excludes the Floating Action Button, which should be placed
+/// in the Scaffold using [floatingActionButton] and [floatingActionButtonLocation].
 class CustomBottomNavBar extends StatelessWidget {
   final bool isVisible;
   final int currentIndex;
   final ValueChanged<int>? onTap;
-  final VoidCallback? onFabPressed;
 
   const CustomBottomNavBar({
     super.key,
     this.isVisible = true,
     this.currentIndex = 0,
     this.onTap,
-    this.onFabPressed,
   });
 
   /// Helper method to build consistent bottom navigation items.
@@ -27,13 +25,15 @@ class CustomBottomNavBar extends StatelessWidget {
 
     return Expanded(
       child: InkWell(
-        onTap: () {
-          onTap?.call(index);
-          print('$label tapped! Index: $index');
-        },
-        customBorder: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppDimens.cardBorderRadius)),
+        onTap: () => onTap?.call(index),
+        customBorder: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(AppDimens.cardBorderRadius),
+        ),
         child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: AppDimens.cardMargin, vertical: AppDimens.cardMargin / 2),
+          padding: const EdgeInsets.symmetric(
+            horizontal: AppDimens.cardMargin,
+            vertical: AppDimens.cardMargin / 2,
+          ),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
@@ -53,87 +53,27 @@ class CustomBottomNavBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    if (!isVisible) return const SizedBox.shrink();
+
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
 
-    if (!isVisible) {
-      return const SizedBox.shrink();
-    }
-
-    // The desired amount the FAB should visually protrude above the BottomAppBar.
-    // For "half inside, half outside", this is exactly half of the FAB's height.
-    final double fabProtrusionAmount = AppDimens.fabSize / 2;
-    final double bottomBarHeight = kBottomNavigationBarHeight;
-
-    // Calculate the total height this CustomBottomNavBar widget will occupy.
-    // This is the standard BottomAppBar height PLUS the portion of the FAB
-    // that sticks out upwards. This height is crucial for the Scaffold's body padding.
-    final double totalHeightWithFabProtrusion = bottomBarHeight + fabProtrusionAmount;
-
-    // Calculate the y-offset for Transform.translate.
-    // The Align(alignment: Alignment.topCenter) places the FAB's top at the top of the Stack.
-    // To make it half-in and half-out, the FAB's *top edge* should be at
-    // `totalHeightWithFabProtrusion - AppDimens.fabSize`.
-    final double fabTranslateYOffset = -(AppDimens.fabSize / 2);
-
-
-    return SizedBox( // Use SizedBox to explicitly define the height of the bottom nav bar area
-      height: totalHeightWithFabProtrusion, // Corrected: This now reports its true visual height
-      child: Stack(
-        alignment: Alignment.bottomCenter, // Align children to the bottom center
-        clipBehavior: Clip.none, // Crucial: Allows children (FAB) to paint outside the Stack's bounds
-        children: [
-          // The BottomAppBar itself, positioned at the very bottom of the Stack
-          Positioned(
-            left: 0,
-            right: 0,
-            bottom: 0,
-            child: BottomAppBar(
-              color: colorScheme.surface,
-              elevation: AppDimens.cardElevation,
-              shape: const CircularNotchedRectangle(), // Creates the notch for the FAB
-              child: SizedBox(
-                height: bottomBarHeight, // Height for the internal Row
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceAround,
-                  children: [
-                    _buildBottomNavItem(Icons.assignment, 'Index', theme, currentIndex == 0, 0),
-                    _buildBottomNavItem(Icons.calendar_today, 'Calendar', theme, currentIndex == 1, 1),
-                    // HERE IS THE FLOATING ACTION BUTTON SPACE
-                    // This SizedBox creates the horizontal space in the Row for the FAB.
-                    // Its width should be at least the FAB's diameter plus some margin.
-                    SizedBox(width: AppDimens.fabSize + AppDimens.cardMargin),
-                    _buildBottomNavItem(Icons.timer, 'Focus', theme, currentIndex == 2, 2),
-                    _buildBottomNavItem(Icons.person, 'Profile', theme, currentIndex == 3, 3),
-                  ],
-                ),
-              ),
-            ),
-          ),
-          // Centered Floating Action Button
-      Align(
-        alignment: Alignment.topCenter,
-        child: Transform.translate(
-          offset: Offset(0, -(AppDimens.fabSize / 2)), // <- THIS IS THE FIX
-          child: SizedBox(
-            width: AppDimens.fabSize,
-            height: AppDimens.fabSize,
-            child: FloatingActionButton(
-              onPressed: onFabPressed,
-              tooltip: 'Add Task',
-              backgroundColor: colorScheme.primary,
-              foregroundColor: colorScheme.onPrimary,
-              shape: const CircleBorder(),
-              child: Icon(
-                Icons.add,
-                size: AppDimens.fabIconSize,
-              ),
-            ),
-          ),
+    return BottomAppBar(
+      color: colorScheme.surface,
+      elevation: AppDimens.cardElevation,
+      shape: const CircularNotchedRectangle(), // Creates notch for FAB
+      child: SizedBox(
+        height: kBottomNavigationBarHeight,
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceAround,
+          children: [
+            _buildBottomNavItem(Icons.assignment, 'Index', theme, currentIndex == 0, 0),
+            _buildBottomNavItem(Icons.calendar_today, 'Calendar', theme, currentIndex == 1, 1),
+            const SizedBox(width: AppDimens.fabSize), // Spacer for FAB
+            _buildBottomNavItem(Icons.timer, 'Focus', theme, currentIndex == 2, 2),
+            _buildBottomNavItem(Icons.person, 'Profile', theme, currentIndex == 3, 3),
+          ],
         ),
-      ),
-
-        ],
       ),
     );
   }
