@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:to_do/utils/app_themes.dart';
 import 'package:to_do/views/screens/task_detail_screen.dart';
-import 'package:to_do/views/widgets/custom_bottom_nav_bar.dart';
 import 'package:to_do/views/screens/task_lists_screen.dart';
+import 'package:to_do/views/widgets/custom_bottom_nav_bar.dart';
 
 class AppShell extends StatefulWidget {
   const AppShell({super.key});
@@ -15,19 +16,17 @@ class _AppShellState extends State<AppShell> {
   int _selectedTabIndex = 0;
 
   final List<GlobalKey<NavigatorState>> _navigatorKeys = [
-    GlobalKey<NavigatorState>(),
-    GlobalKey<NavigatorState>(),
-    GlobalKey<NavigatorState>(),
-    GlobalKey<NavigatorState>(),
+    GlobalKey<NavigatorState>(), // Index
+    GlobalKey<NavigatorState>(), // Calendar
+    GlobalKey<NavigatorState>(), // Focus
+    GlobalKey<NavigatorState>(), // Profile
   ];
 
   void _onTabTapped(int index) {
     if (_selectedTabIndex == index) {
       _navigatorKeys[index].currentState?.popUntil((route) => route.isFirst);
     } else {
-      setState(() {
-        _selectedTabIndex = index;
-      });
+      setState(() => _selectedTabIndex = index);
     }
   }
 
@@ -42,43 +41,45 @@ class _AppShellState extends State<AppShell> {
     final List<Widget> _tabBodies = [
       Navigator(
         key: _navigatorKeys[0],
-        onGenerateRoute: (settings) {
-          return MaterialPageRoute(builder: (context) => const TaskListsScreen());
-        },
+        onGenerateRoute: (settings) => MaterialPageRoute(
+          builder: (context) => const TaskListsScreen(),
+        ),
       ),
       Navigator(
         key: _navigatorKeys[1],
-        onGenerateRoute: (settings) {
-          return MaterialPageRoute(builder: (context) => const Center(child: Text("Calendar Screen (TODO)")));
-        },
+        onGenerateRoute: (settings) => MaterialPageRoute(
+          builder: (context) => const Center(child: Text("Calendar Screen (TODO)")),
+        ),
       ),
       Navigator(
         key: _navigatorKeys[2],
-        onGenerateRoute: (settings) {
-          return MaterialPageRoute(builder: (context) => const Center(child: Text("Focus Screen (TODO)")));
-        },
+        onGenerateRoute: (settings) => MaterialPageRoute(
+          builder: (context) => const Center(child: Text("Focus Screen (TODO)")),
+        ),
       ),
       Navigator(
         key: _navigatorKeys[3],
-        onGenerateRoute: (settings) {
-          return MaterialPageRoute(builder: (context) => const Center(child: Text("Profile Screen (TODO)")));
-        },
+        onGenerateRoute: (settings) => MaterialPageRoute(
+          builder: (context) => const Center(child: Text("Profile Screen (TODO)")),
+        ),
       ),
     ];
 
-    return WillPopScope(
-      onWillPop: () async {
-        final NavigatorState currentTabNav = _navigatorKeys[_selectedTabIndex].currentState!;
-        if (await currentTabNav.maybePop()) {
-          // If the current tab can pop, just pop it.
-          return false;
-        } else if (_selectedTabIndex != 0) {
-          // If user is not on tab 0, switch to tab 0 instead of exiting
-          setState(() => _selectedTabIndex = 0);
-          return false;
-        }
-        // Allow app to exit (default Android behavior)
-        return true;
+    return PopScope(
+      canPop: true,
+      onPopInvoked: (didPop) {
+        if (didPop) return;
+
+        final navigator = _navigatorKeys[_selectedTabIndex].currentState!;
+        navigator.maybePop().then((didActuallyPop) {
+          if (didActuallyPop) return;
+
+          if (_selectedTabIndex != 0) {
+            setState(() => _selectedTabIndex = 0);
+          } else {
+            SystemNavigator.pop(); // Exit the app
+          }
+        });
       },
       child: Scaffold(
         body: IndexedStack(
@@ -104,5 +105,4 @@ class _AppShellState extends State<AppShell> {
       ),
     );
   }
-
 }
