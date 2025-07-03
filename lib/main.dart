@@ -62,6 +62,7 @@ class MyApp extends StatelessWidget {
         return MaterialApp(
           title: 'To-Do App',
           theme: AppThemes.lightTheme(),
+          debugShowCheckedModeBanner: false,
           darkTheme: AppThemes.darkTheme(),
           themeMode: themeViewModel.flutterThemeMode,
           home: const AppShell(),

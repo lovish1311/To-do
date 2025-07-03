@@ -139,7 +139,7 @@ class _TaskDetailScreenState extends State<TaskDetailScreen> {
           wishTaskDeadline: _isWishTask ? _selectedWishTaskDeadline : null,
         );
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Task "${_titleController.text}" added!')),
+          SnackBar(content: Text('Task "${_titleController.text}" added!'),behavior: SnackBarBehavior.floating,),
         );
       } else {
         // Update existing task
@@ -154,7 +154,7 @@ class _TaskDetailScreenState extends State<TaskDetailScreen> {
         );
         await taskViewModel.updateTask(updatedTask);
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Task "${_titleController.text}" updated!')),
+          SnackBar(content: Text('Task "${_titleController.text}" updated!'),behavior: SnackBarBehavior.floating,),
         );
       }
       Navigator.of(context).pop(); // Go back to the previous screen

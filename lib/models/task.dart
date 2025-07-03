@@ -96,13 +96,13 @@ class Task extends HiveObject {
       isCompleted: isCompleted ?? this.isCompleted,
       createdAt: createdAt ?? this.createdAt,
       taskListId: taskListId ?? this.taskListId,
-      dueDateTime: dueDateTime ?? this.dueDateTime,
+      dueDateTime: dueDateTime,
       isRecurring: isRecurring ?? this.isRecurring,
       recurrencePattern: recurrencePattern ?? this.recurrencePattern,
       priority: priority ?? this.priority,
       subtasks: subtasks ?? this.subtasks,
       isWishTask: isWishTask ?? this.isWishTask,
-      wishTaskDeadline: wishTaskDeadline ?? this.wishTaskDeadline,
+      wishTaskDeadline: wishTaskDeadline,
       wishTaskCompletionStatus: wishTaskCompletionStatus ?? this.wishTaskCompletionStatus,
     );
   }

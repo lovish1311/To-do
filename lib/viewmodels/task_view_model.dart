@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:hive/hive.dart';
 import 'package:to_do/models/task.dart'; // Import the Task model
 import 'package:to_do/services/task_service.dart'; // Import the TaskService
 import 'package:uuid/uuid.dart'; // For generating unique IDs
@@ -43,6 +44,14 @@ class TaskViewModel extends ChangeNotifier {
     notifyListeners(); // Notify all listening widgets that the data has changed.
     print('ViewModel: Fetched ${_tasks.length} tasks (Active: ${activeTasks.length}, Completed: ${completedTasks.length}).'); // For debugging
   }
+  Future<void> loadTasks() async {
+    final box = await Hive.openBox<Task>('tasks');
+    final allTasks = box.values.toList();
+
+    _tasks = allTasks;
+    notifyListeners();
+  }
+
 
   /// Adds a new task.
   Future<void> addTask({
