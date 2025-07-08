@@ -5,6 +5,7 @@ import 'package:provider/provider.dart';
 
 import 'package:to_do/models/task_list.dart'; // Provides TaskListAdapter
 import 'package:to_do/models/task.dart'; // NEW: Import Task model
+import 'package:to_do/services/notification_service.dart';
 import 'package:to_do/services/task_list_service.dart';
 import 'package:to_do/services/task_service.dart'; // NEW: Import TaskService
 import 'package:to_do/viewmodels/task_list_view_model.dart';
@@ -13,10 +14,11 @@ import 'package:to_do/viewmodels/theme_view_model.dart';
 import 'package:to_do/utils/constants.dart';
 import 'package:to_do/utils/app_themes.dart';
 import 'package:to_do/views/screens/app_shell.dart';
-import 'package:to_do/views/screens/task_lists_screen.dart';
+
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  await NotificationService().init();
 
   final appDocumentDirectory = await getApplicationDocumentsDirectory();
   Hive.init(appDocumentDirectory.path);

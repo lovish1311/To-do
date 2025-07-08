@@ -45,7 +45,9 @@ dependencies:
   path_provider: ^2.0.11 # For getting local file paths for Hive
 
   # Notifications
-  flutter_local_notifications: ^17.1.2 # For local task reminders
+  flutter_local_notifications: ^19.1.0
+  timezone: ^0.10.0              # Required for zoned schedule notifications
+  flutter_native_timezone: ^2.0.0 # For local task reminders
   flutter_svg: ^2.0.10+1
   intl: ^0.20.2
 

@@ -5,6 +5,8 @@ import 'package:to_do/views/screens/task_detail_screen.dart';
 import 'package:to_do/views/screens/task_lists_screen.dart';
 import 'package:to_do/views/widgets/custom_bottom_nav_bar.dart';
 
+import '../../services/notification_service.dart';
+
 class AppShell extends StatefulWidget {
   const AppShell({super.key});
 
@@ -30,7 +32,15 @@ class _AppShellState extends State<AppShell> {
     }
   }
 
-  void _onAddFabPressed() {
+  void _onAddFabPressed() async {
+// Schedule a delayed notification after 15 seconds
+    await NotificationService().showInstant(id: 102, title: "title", body: 'body');
+    await NotificationService().scheduleOnce(
+      id: 1001,
+      title: 'Reminder',
+      body: 'Don\'t forget to complete your new task!',
+      delay: const Duration(seconds: 15),
+    );
     _navigatorKeys[_selectedTabIndex].currentState?.push(
       MaterialPageRoute(builder: (context) => TaskDetailScreen()),
     );
