@@ -1,9 +1,11 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart'; // Required for MethodChannel
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:flutter_native_timezone/flutter_native_timezone.dart';
-import 'package:timezone/timezone.dart' as tz;
 import 'package:timezone/data/latest_all.dart' as tzdata;
-import 'package:flutter/services.dart';
+import 'package:timezone/timezone.dart' as tz;
 
 class NotificationService {
   // Singleton pattern
@@ -11,19 +13,19 @@ class NotificationService {
   static final NotificationService _instance = NotificationService._internal();
   factory NotificationService() => _instance;
 
-  final FlutterLocalNotificationsPlugin _plugin =
-  FlutterLocalNotificationsPlugin();
+  final FlutterLocalNotificationsPlugin _plugin = FlutterLocalNotificationsPlugin();
+  static const MethodChannel _platform = MethodChannel('dexterx.dev/flutter_local_notifications_example');
 
   /// Call this early in main()
   Future<void> init() async {
     WidgetsFlutterBinding.ensureInitialized();
 
-    // 1. Initialize Timezones
+    // 1. Timezone initialization
     tzdata.initializeTimeZones();
     final String timeZone = await FlutterNativeTimezone.getLocalTimezone();
     tz.setLocalLocation(tz.getLocation(timeZone));
 
-    // 2. Android initialization settings
+    // 2. Notification init settings
     const androidInit = AndroidInitializationSettings('@mipmap/ic_launcher');
     const initSettings = InitializationSettings(android: androidInit);
 
@@ -34,14 +36,14 @@ class NotificationService {
 
     // 3. Request Android 13+ notification permission
     await _plugin
-        .resolvePlatformSpecificImplementation<
-        AndroidFlutterLocalNotificationsPlugin>()
+        .resolvePlatformSpecificImplementation<AndroidFlutterLocalNotificationsPlugin>()
         ?.requestNotificationsPermission();
+
+    // 4. Request exact alarm (Android 12+)
+    await _checkAndRequestExactAlarmPermission();
   }
 
-  /// Handle notification taps
   void _onNotificationResponse(NotificationResponse response) {
-    // You can route the user to a specific screen here.
     debugPrint('Notification tapped: id=${response.id}');
   }
 
@@ -92,7 +94,28 @@ class NotificationService {
     );
   }
 
-  /// Schedule a daily notification at the given [hour] and [minute]
+  /// Request exact alarm permission if not already granted (Android 12+)
+  Future<void> _checkAndRequestExactAlarmPermission() async {
+    if (Platform.isAndroid && (await _androidSdkInt()) >= 31) {
+      try {
+        final bool granted = await _platform.invokeMethod('areExactAlarmsAllowed');
+
+        if (!granted) {
+          await _platform.invokeMethod('requestExactAlarmPermission');
+        }
+      } on PlatformException catch (e) {
+        debugPrint("Exact alarm permission error: ${e.message}");
+      }
+    }
+  }
+
+  /// Get Android SDK version
+  Future<int> _androidSdkInt() async {
+    final String sdkString = await _platform.invokeMethod('getAndroidSdkInt');
+    return int.tryParse(sdkString) ?? 0;
+  }
+
+  /// Schedule a daily notification
   Future<void> scheduleDaily({
     required int id,
     required String title,
@@ -125,21 +148,8 @@ class NotificationService {
       matchDateTimeComponents: DateTimeComponents.time,
     );
   }
-  Future<void> checkAndRequestExactAlarm() async {
-    const platform = MethodChannel('dexterx.dev/flutter_local_notifications_example');
 
-    try {
-      final bool granted = await platform.invokeMethod('areExactAlarmsAllowed');
-
-      if (!granted) {
-        await platform.invokeMethod('requestExactAlarmPermission');
-      }
-    } on PlatformException catch (e) {
-      debugPrint("Error checking/requesting exact alarm permission: ${e.message}");
-    }
-  }
-
-  /// Schedule a weekly notification on [weekday] (1=Mon … 7=Sun) at [hour]:[minute]
+  /// Schedule a weekly notification
   Future<void> scheduleWeekly({
     required int id,
     required String title,
@@ -149,7 +159,6 @@ class NotificationService {
     required int minute,
   }) async {
     final now = tz.TZDateTime.now(tz.local);
-    // Find next instance of the target weekday
     int daysToAdd = (weekday - now.weekday) % 7;
     var scheduled = tz.TZDateTime(
       tz.local,
@@ -183,9 +192,6 @@ class NotificationService {
     );
   }
 
-  /// Cancel a single notification by [id]
   Future<void> cancel(int id) => _plugin.cancel(id);
-
-  /// Cancel all notifications
   Future<void> cancelAll() => _plugin.cancelAll();
 }
