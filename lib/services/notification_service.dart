@@ -93,6 +93,30 @@ class NotificationService {
       androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
     );
   }
+  Future<void> scheduleAt({
+    required int id,
+    required String title,
+    required String body,
+    required tz.TZDateTime scheduledDateTime,
+  }) async {
+    const androidDetails = AndroidNotificationDetails(
+      'scheduled_channel',
+      'Scheduled Notifications',
+      channelDescription: 'Channel for one-off scheduled alerts',
+      importance: Importance.max,
+      priority: Priority.high,
+    );
+    const details = NotificationDetails(android: androidDetails);
+
+    await _plugin.zonedSchedule(
+      id,
+      title,
+      body,
+      scheduledDateTime,
+      details,
+      androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
+    );
+  }
 
   /// Request exact alarm permission if not already granted (Android 12+)
   Future<void> _checkAndRequestExactAlarmPermission() async {

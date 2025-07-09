@@ -82,7 +82,7 @@ c. An IDE (VS Code with Flutter extension or Android Studio)
 Installation Steps
 Clone the repository:
 
-git clone https://github.com/your-username/to-do-app.git
+git clone https://github.com/lovish1311/to-do-app.git
 cd to-do-app
 
 Fetch dependencies:
@@ -103,13 +103,7 @@ flutter run
 
 Choose your target device (Android emulator, iOS simulator, or Chrome for web).
 
-Current Development Status (Day 1)
-a. Project setup and all necessary dependencies are configured.
-b. Hive database is initialized in main.dart, and initial boxes are opened.
-c. The TaskList data model is defined with Hive annotations.
-d. The TaskListService is implemented, providing CRUD operations and a change listener for TaskList objects, including basic error handling.
-e. A constants.dart file has been introduced for managing string constants.
-f. The application currently displays a placeholder screen for "My Task Lists."
+
 
 
 

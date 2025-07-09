@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:to_do/models/task.dart'; // Ensure your Task model is correctly defined
+import 'package:to_do/services/notification_service.dart';
 import 'package:to_do/viewmodels/task_view_model.dart'; // Ensure TaskViewModel is available
 import 'package:to_do/utils/app_themes.dart'; // For AppDimens and theme colors
-
+import 'package:timezone/timezone.dart' as tz;
 /// A screen for adding new tasks or viewing/editing existing task details.
 /// This screen uses a Scaffold but avoids the built-in AppBar, opting for a custom header.
 class TaskDetailScreen extends StatefulWidget {
@@ -123,43 +124,74 @@ class _TaskDetailScreenState extends State<TaskDetailScreen> {
 
       final List<String> subtasks = _subtaskControllers
           .map((controller) => controller.text.trim())
-          .where((text) => text.isNotEmpty) // Only save non-empty subtasks
+          .where((text) => text.isNotEmpty)
           .toList();
+
+      final String title = _titleController.text.trim();
+      final String? description = _descriptionController.text.trim().isEmpty
+          ? null
+          : _descriptionController.text.trim();
 
       if (widget.task == null) {
         // Add new task
         await taskViewModel.addTask(
-          title: _titleController.text.trim(),
-          description: _descriptionController.text.trim().isEmpty ? null : _descriptionController.text.trim(),
-          taskListId: 'default_list_id', // Placeholder for now, refine later
+          title: title,
+          description: description,
+          taskListId: 'default_list_id',
           dueDateTime: _selectedDueDateTime,
           priority: _selectedPriority,
           subtasks: subtasks,
           isWishTask: _isWishTask,
           wishTaskDeadline: _isWishTask ? _selectedWishTaskDeadline : null,
         );
+
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Task "${_titleController.text}" added!'),behavior: SnackBarBehavior.floating,),
+          SnackBar(
+            content: Text('Task "$title" added!'),
+            behavior: SnackBarBehavior.floating,
+          ),
         );
+
+        await NotificationService().showInstant(
+          id: 22,
+          title: "Your task has been added",
+          body: title,
+        );
+
+        if (_selectedDueDateTime != null && _selectedDueDateTime!.isAfter(DateTime.now())) {
+          await NotificationService().scheduleAt(
+            id: 42,
+            title: "Reminder for your task",
+            body: "Your task \"$title\" is due now",
+            scheduledDateTime: tz.TZDateTime.from(_selectedDueDateTime!, tz.local),
+          );
+        }
       } else {
         // Update existing task
         final updatedTask = widget.task!.copyWith(
-          title: _titleController.text.trim(),
-          description: _descriptionController.text.trim().isEmpty ? null : _descriptionController.text.trim(),
+          title: title,
+          description: description,
           dueDateTime: _selectedDueDateTime,
           priority: _selectedPriority,
           subtasks: subtasks,
           isWishTask: _isWishTask,
           wishTaskDeadline: _isWishTask ? _selectedWishTaskDeadline : null,
         );
+
         await taskViewModel.updateTask(updatedTask);
+
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Task "${_titleController.text}" updated!'),behavior: SnackBarBehavior.floating,),
+          SnackBar(
+            content: Text('Task "$title" updated!'),
+            behavior: SnackBarBehavior.floating,
+          ),
         );
       }
-      Navigator.of(context).pop(); // Go back to the previous screen
+
+      Navigator.of(context).pop(); // Go back to previous screen
     }
   }
+
 
   @override
   Widget build(BuildContext context) {
