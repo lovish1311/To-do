@@ -1,13 +1,15 @@
 // lib/views/screens/task_lists_screen.dart
 import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'package:to_do/models/task.dart';
 import 'package:to_do/viewmodels/task_view_model.dart';
 import 'package:to_do/viewmodels/theme_view_model.dart'; // Re-import ThemeViewModel for its AppBar
 import 'package:to_do/utils/app_themes.dart';
+// CustomBottomNavBar is still not used directly here
+// import 'package:to_do/views/widgets/custom_bottom_nav_bar.dart';
 import 'package:to_do/views/widgets/task_card.dart';
 import 'package:to_do/views/widgets/completed_tasks_section.dart';
+import 'package:to_do/views/screens/task_detail_screen.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
 class TaskListsScreen extends StatefulWidget {
@@ -22,8 +24,11 @@ class _TaskListsScreenState extends State<TaskListsScreen> {
 
   void _navigateToEditTask(BuildContext context, Task task) {
     // This correctly uses the nested Navigator for navigation within this tab.
-    context.push('/task-detail', extra: task);
-
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (context) => TaskDetailScreen(task: task),
+      ),
+    );
     print('Navigating to TaskDetailScreen to edit task: ${task.title}');
   }
 

@@ -14,7 +14,6 @@ import 'package:to_do/viewmodels/theme_view_model.dart';
 import 'package:to_do/utils/constants.dart';
 import 'package:to_do/utils/app_themes.dart';
 import 'package:to_do/views/screens/app_shell.dart';
-import 'package:to_do/router.dart';
 
 
 void main() async {
@@ -62,13 +61,13 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return Consumer<ThemeViewModel>(
       builder: (context, themeViewModel, child) {
-        return MaterialApp.router(
+        return MaterialApp(
           title: 'To-Do App',
           theme: AppThemes.lightTheme(),
+          debugShowCheckedModeBanner: false,
           darkTheme: AppThemes.darkTheme(),
           themeMode: themeViewModel.flutterThemeMode,
-          debugShowCheckedModeBanner: false,
-          routerConfig: appRouter, // ✅ Use GoRouter config
+          home: const AppShell(),
         );
       },
     );

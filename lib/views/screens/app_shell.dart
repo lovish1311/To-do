@@ -8,15 +8,7 @@ import 'package:to_do/views/widgets/custom_bottom_nav_bar.dart';
 import '../../services/notification_service.dart';
 
 class AppShell extends StatefulWidget {
-  final Widget child;
-  final String currentPath; // The full path of the current route
-
-  // NEW: Update the constructor to require these properties
-  const AppShell({
-    super.key,
-    required this.child,
-    required this.currentPath,
-  });
+  const AppShell({super.key});
 
   @override
   State<AppShell> createState() => _AppShellState();

@@ -9,10 +9,3 @@ class AppConstants {
 // static const String appName = 'My To-Do App';
 // static const String defaultTheme = 'system';
 }
-class AppRoutes {
-  static const tasks = '/tasks';
-  static const calendar = '/calendar';
-  static const focus = '/focus';
-  static const profile = '/profile';
-  static const taskDetail = '/task-detail';
-}
