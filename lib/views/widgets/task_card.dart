@@ -1,5 +1,6 @@
 // lib/views/widgets/task_card.dart
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:to_do/models/task.dart';
 import 'package:to_do/utils/app_themes.dart'; // Import AppDimens and AppColors
 import 'package:to_do/viewmodels/task_view_model.dart';
@@ -15,9 +16,11 @@ class TaskCard extends StatelessWidget {
   const TaskCard({super.key, required this.task});
 
   void _navigateToEditTask(BuildContext context, Task task) {
-    Navigator.of(context).push(
-      MaterialPageRoute(builder: (context) => TaskDetailScreen(task: task)),
+    GoRouter.of(context).pushNamed(
+      'taskDetail',
+      pathParameters: {'id': task.id},
     );
+
     print('Navigating to TaskDetailScreen to edit task: ${task.title}');
   }
 

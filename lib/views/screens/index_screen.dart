@@ -1,4 +1,4 @@
-// lib/views/screens/task_lists_screen.dart
+// lib/views/screens/index_screen.dart
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:to_do/models/task.dart';
@@ -11,26 +11,22 @@ import 'package:to_do/views/widgets/task_card.dart';
 import 'package:to_do/views/widgets/completed_tasks_section.dart';
 import 'package:to_do/views/screens/task_detail_screen.dart';
 import 'package:flutter_svg/flutter_svg.dart';
-
-class TaskListsScreen extends StatefulWidget {
-  const TaskListsScreen({super.key});
+import 'package:go_router/go_router.dart';
+class IndexScreen extends StatefulWidget {
+  const IndexScreen({super.key});
 
   @override
-  State<TaskListsScreen> createState() => _TaskListsScreenState();
+  State<IndexScreen> createState() => _IndexScreenState();
 }
 
-class _TaskListsScreenState extends State<TaskListsScreen> {
+class _IndexScreenState extends State<IndexScreen> {
   // _selectedTabIndex and _onTabTapped are moved to AppShell.
 
   void _navigateToEditTask(BuildContext context, Task task) {
-    // This correctly uses the nested Navigator for navigation within this tab.
-    Navigator.of(context).push(
-      MaterialPageRoute(
-        builder: (context) => TaskDetailScreen(task: task),
-      ),
-    );
+    context.go('/tasks/${task.id}');
     print('Navigating to TaskDetailScreen to edit task: ${task.title}');
   }
+
 
   @override
   Widget build(BuildContext context) {

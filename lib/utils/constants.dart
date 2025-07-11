@@ -8,4 +8,10 @@ class AppConstants {
 // Other constants can go here later, e.g.:
 // static const String appName = 'My To-Do App';
 // static const String defaultTheme = 'system';
+  static const String indexPath        = '/tasks';
+  static const String taskDetailPath  = '/tasks/:id';
+  static const String calendarPath    = '/calendar';
+  static const String focusPath       = '/focus';
+  static const String profilePath     = '/profile';
+
 }
