@@ -15,7 +15,7 @@ final GoRouter router = GoRouter(
   routes: [
     ShellRoute(
       navigatorKey: _shellNavigatorKey,
-      builder: (context, state, child) => AppShell(child: child, state: state),
+      builder: (context, state, child) => AppShell(state: state, child: child),
       routes: [
         GoRoute(
           path: AppConstants.indexPath,
