@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:provider/provider.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart'; // ✅ ScreenUtil
 
 import 'package:to_do/models/task_list.dart';
 import 'package:to_do/models/task.dart';
@@ -14,13 +15,16 @@ import 'package:to_do/viewmodels/task_view_model.dart';
 import 'package:to_do/viewmodels/theme_view_model.dart';
 import 'package:to_do/utils/constants.dart';
 import 'package:to_do/utils/app_themes.dart';
-import 'package:to_do/views/router.dart'; // ← router import
+import 'package:to_do/views/router.dart';
+import 'package:to_do/views/screens/login_screen.dart';
+import 'package:to_do/views/screens/register_screen.dart'; // ← GoRouter
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await NotificationService().init();
 
   final appDocumentDirectory = await getApplicationDocumentsDirectory();
+
   Hive.init(appDocumentDirectory.path);
 
   Hive.registerAdapter(TaskListAdapter());
@@ -54,17 +58,27 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Consumer<ThemeViewModel>(
-      builder: (context, themeViewModel, child) {
-        return MaterialApp.router(
-          debugShowCheckedModeBanner: false,
-          title: 'To-Do App',
-          theme: AppThemes.lightTheme(),
-          darkTheme: AppThemes.darkTheme(),
-          themeMode: themeViewModel.flutterThemeMode,
-          routerConfig: router, // ← use GoRouter here
+    return ScreenUtilInit(
+      designSize: const Size(375, 812),
+      minTextAdapt: true,
+      splitScreenMode: true,
+      builder: (context, child) {
+        return Consumer<ThemeViewModel>(
+          builder: (context, themeViewModel, child) {
+            return MaterialApp(
+              debugShowCheckedModeBanner: false,
+              title: 'To-Do App',
+              theme: AppThemes.lightTheme(),
+              darkTheme: AppThemes.darkTheme(),
+              themeMode: themeViewModel.flutterThemeMode,
+              // home: const LoginScreen(), // 👈 TEMPORARY for testing
+              home: const RegisterScreen(), // 👈 TEMPORARY for testing
+              // routerConfig: router, // ❌ Commented during login testing
+            );
+          },
         );
       },
     );
   }
 }
+
