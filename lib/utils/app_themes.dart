@@ -1,5 +1,6 @@
 // lib/utils/app_themes.dart
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 // --- Custom Color Palettes ---
 // Defining custom color palettes ensures consistency across light and dark themes.
@@ -248,4 +249,7 @@ class AppDimens {
 
   // Custom additions for Login/Register
   static const double paddingTopAfterStatusBar = 16.0;
+
+  static double screenVerticalPadding = 24.0.h; // Top/bottom padding
+  static double screenHorizontalPadding = 20.0.w; // Left/right padding
 }
