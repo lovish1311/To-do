@@ -3,7 +3,10 @@ import 'package:flutter/services.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:provider/provider.dart';
-import 'package:flutter_screenutil/flutter_screenutil.dart'; // ✅ ScreenUtil
+import 'package:flutter_screenutil/flutter_screenutil.dart';
+
+import 'package:firebase_core/firebase_core.dart'; // 🔧 Added
+import 'firebase_options.dart'; // 🔧 Added
 
 import 'package:to_do/models/task_list.dart';
 import 'package:to_do/models/task.dart';
@@ -17,14 +20,19 @@ import 'package:to_do/utils/constants.dart';
 import 'package:to_do/utils/app_themes.dart';
 import 'package:to_do/views/router.dart';
 import 'package:to_do/views/screens/login_screen.dart';
-import 'package:to_do/views/screens/register_screen.dart'; // ← GoRouter
+import 'package:to_do/views/screens/register_screen.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
+  // 🔧 Initialize Firebase
+  await Firebase.initializeApp(
+    options: DefaultFirebaseOptions.currentPlatform,
+  );
+
   await NotificationService().init();
 
   final appDocumentDirectory = await getApplicationDocumentsDirectory();
-
   Hive.init(appDocumentDirectory.path);
 
   Hive.registerAdapter(TaskListAdapter());
@@ -71,9 +79,9 @@ class MyApp extends StatelessWidget {
               theme: AppThemes.lightTheme(),
               darkTheme: AppThemes.darkTheme(),
               themeMode: themeViewModel.flutterThemeMode,
-              // home: const LoginScreen(), // 👈 TEMPORARY for testing
-              home: const RegisterScreen(), // 👈 TEMPORARY for testing
-              // routerConfig: router, // ❌ Commented during login testing
+              // 🔧 You can switch back later to routerConfig if needed
+              // routerConfig: router,
+              home: const RegisterScreen(), // Or LoginScreen
             );
           },
         );
@@ -81,4 +89,3 @@ class MyApp extends StatelessWidget {
     );
   }
 }
-

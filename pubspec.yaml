@@ -39,6 +39,8 @@ dependencies:
   # State Management
   provider: ^6.0.5 # A common stable version for provider
   flutter_screenutil: ^5.9.0
+  firebase_core: ^2.30.0
+  firebase_auth: ^4.18.0
 
   # Local Data Persistence
   hive: ^2.2.3 # A common stable version for Hive
