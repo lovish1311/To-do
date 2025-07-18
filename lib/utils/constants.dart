@@ -15,3 +15,19 @@ class AppConstants {
   static const String profilePath     = '/profile';
 
 }
+class AppAssets {
+  static const String _base = 'assets';
+  static const String _icons = '$_base/icons';
+  static const String _images = '$_base/images';
+
+  // Icons
+  static const String googleIcon = '$_icons/google_icon.svg';
+
+  static String appleIcon='$_icons/apple_icon.svg';
+
+  static String facebookIcon='$_icons/facebook_icon.svg';
+
+// Add other icons or images below like:
+// static const String appleIcon = '$_icons/apple_icon.svg';
+// static const String loginBackground = '$_images/login_bg.png';
+}
