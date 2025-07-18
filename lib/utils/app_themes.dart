@@ -199,29 +199,53 @@ class AppThemes {
 // Instead of separate XMLs, we define common spacing, font sizes, etc., as constants.
 // This file can be expanded with more layout constants as needed.
 class AppDimens {
+  // Layout & Padding
   static const double screenPadding = 16.0;
   static const double cardMargin = 12.0; // Margin between cards
-  // Adjusted base for internal vertical padding, TaskCard will use a multiplier
+  static const double listItemPadding = 16.0; // Horizontal padding for list items
   static const double cardInternalVerticalPadding = 14.0; // Adjusted base (was 16.0)
+
+  // Card Appearance
   static const double cardElevation = 4.0;
   static const double cardBorderRadius = 10.0;
+
+  // Icon Sizes
   static const double iconSize = 24.0;
-  static const double listItemPadding = 16.0; // Horizontal padding for list items
-  // static const double listItemVerticalPadding = 8.0; // Vertical padding for list items (will be replaced by cardInternalVerticalPadding)
 
-  // NEW: Granular Spacing Constants for internal card elements
-  static const double extraSmallGap = 2.0; // For very small spacing
-  static const double smallGap = 4.0; // For spacing after dates
-  static const double mediumGap = 6.0; // For spacing above tags/buttons
-  static const double largeGap = 8.0; // General purpose larger gap
+  // FAB Dimensions
+  static const double fabSize = 60.0; // Diameter of the FAB
+  static const double fabIconSize = 28.0; // Size of the icon inside the FAB
 
-  // NEW: Tag specific dimensions
+  // Tag Dimensions
   static const double tagHorizontalPadding = 10.0; // Padding inside tags horizontally
   static const double tagVerticalPadding = 4.0; // Padding inside tags vertically
   static const double tagSpacing = 6.0; // Horizontal space between tags in a Wrap
   static const double tagRunSpacing = 4.0; // Vertical space if tags wrap
 
-  // FAB Dimensions
-  static const double fabSize = 60.0; // Diameter of the FAB
-  static const double fabIconSize = 28.0; // Size of the icon inside the FAB
+  // Social Icons
+  static const double socialIconSize = 48.0;
+  static const double socialIconPadding = 8.0;
+
+  // Spacing Constants (Generic)
+  static const double extraSmallGap = 2.0;
+  static const double smallGap = 4.0;
+  static const double mediumGap = 6.0;
+  static const double largeGap = 8.0;
+
+  // Form Spacing (used in Login/Register)
+  static const double formTopSpacing = 32.0;
+  static const double fieldSpacing = 16.0;
+  static const double titleTopSpacing = 24.0;
+  static const double titleBottomSpacing = 8.0;
+  static const double dividerSpacing = 32.0;
+  static const double dividerTextPadding = 12.0;
+
+  // Button Sizes
+  static const double buttonHeight = 48.0;
+
+  // Radius
+  static const double borderRadius = 12.0;
+
+  // Custom additions for Login/Register
+  static const double paddingTopAfterStatusBar = 16.0;
 }
