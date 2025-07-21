@@ -1,10 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:flutter_svg/flutter_svg.dart';
 import 'package:provider/provider.dart';
-
 import 'package:to_do/utils/app_themes.dart';
-import 'package:to_do/utils/constants.dart';
 import 'package:to_do/views/widgets/app_text_field.dart';
 
 class LoginScreen extends StatefulWidget {
@@ -28,34 +25,14 @@ class _LoginScreenState extends State<LoginScreen> {
       });
 
       // TODO: Implement Firebase Auth login
+
       Future.delayed(const Duration(seconds: 2), () {
         setState(() {
           _isLoading = false;
         });
-        // TODO: Navigate to next screen
+        // Navigate to next screen on success
       });
     }
-  }
-
-  Widget _buildSocialButton(String assetPath, VoidCallback onTap) {
-    return InkWell(
-      onTap: onTap,
-      borderRadius: BorderRadius.circular(100.r),
-      child: Container(
-        padding: EdgeInsets.all(12.w),
-        decoration: BoxDecoration(
-          shape: BoxShape.circle,
-          border: Border.all(
-            color: Theme.of(context).colorScheme.onSurface.withOpacity(0.3),
-          ),
-        ),
-        child: SvgPicture.asset(
-          assetPath,
-          width: 24.w,
-          height: 24.h,
-        ),
-      ),
-    );
   }
 
   @override
@@ -109,9 +86,7 @@ class _LoginScreenState extends State<LoginScreen> {
                     onPressed: _isLoading ? null : _login,
                     child: _isLoading
                         ? CircularProgressIndicator(
-                      valueColor: AlwaysStoppedAnimation<Color>(
-                        colorScheme.onPrimary,
-                      ),
+                      valueColor: AlwaysStoppedAnimation<Color>(colorScheme.onPrimary),
                     )
                         : Text(
                       'Login',
@@ -119,25 +94,6 @@ class _LoginScreenState extends State<LoginScreen> {
                         color: colorScheme.onPrimary,
                       ),
                     ),
-                  ),
-                ),
-                SizedBox(height: 24.h),
-                Center(
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      _buildSocialButton(AppAssets.googleIcon, () {
-                        // TODO: Google Sign-In
-                      }),
-                      SizedBox(width: AppDimens.horizontalSpacingMedium.w),
-                      _buildSocialButton(AppAssets.appleIcon, () {
-                        // TODO: Apple Sign-In
-                      }),
-                      SizedBox(width: AppDimens.horizontalSpacingMedium.w),
-                      _buildSocialButton(AppAssets.facebookIcon, () {
-                        // TODO: Facebook Sign-In
-                      }),
-                    ],
                   ),
                 ),
                 SizedBox(height: 16.h),

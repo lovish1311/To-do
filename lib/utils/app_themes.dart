@@ -251,7 +251,5 @@ class AppDimens {
   static const double paddingTopAfterStatusBar = 16.0;
 
   static double screenVerticalPadding = 24.0.h; // Top/bottom padding
-  static double screenHorizontalPadding = 20.0.w;
-
-  static var horizontalSpacingMedium; // Left/right padding
+  static double screenHorizontalPadding = 20.0.w; // Left/right padding
 }
