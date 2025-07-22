@@ -56,6 +56,7 @@ class AppShell extends StatelessWidget {
       floatingActionButton: showBottomNav
           ? FloatingActionButton(
         onPressed: () => context.pushNamed('taskDetail', pathParameters: {'id': 'new'})
+        // onPressed: () => context.push(AppConstants.loginPath)
         ,
         child: const Icon(Icons.add),
       )

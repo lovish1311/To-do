@@ -1,7 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:go_router/go_router.dart';
 import 'package:to_do/utils/app_themes.dart';
+import 'package:flutter_svg/flutter_svg.dart';
+import 'package:to_do/utils/constants.dart'; // For AppSvg
+import 'package:to_do/views/widgets/social_icon.dart';
+
 
 import '../widgets/app_text_field.dart';
 
@@ -114,14 +119,50 @@ class RegisterScreen extends StatelessWidget {
 
                 SizedBox(height: AppDimens.fieldSpacing.h * 1.5),
 
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  SocialIconButton(
+                    assetPath: AppSvg.googleIconPath,
+                    onTap: () {
+                      // TODO: Google sign-in logic
+                    },
+                  ),
+                  SizedBox(width: AppDimens.fieldSpacing.w * 1.5),
+                  SocialIconButton(
+                    assetPath: AppSvg.appleIconPath,
+                    onTap: () {
+                      // TODO: Apple sign-in logic
+                    },
+                  ),
+                ],
+              ),
+
+                SizedBox(height: AppDimens.fieldSpacing.h * 1.8),
+
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    _socialIcon('assets/images/google_placeholder.png'),
-                    SizedBox(width: AppDimens.fieldSpacing.w * 1.5),
-                    _socialIcon('assets/images/other_placeholder.png'),
+                    Text(
+                      "Already have an account? ",
+                      style: Theme.of(context).textTheme.bodyMedium,
+                    ),
+                    GestureDetector(
+                      onTap: () {
+                       context.go('/login'); // or use context.go('/login') if using go_router
+                      },
+                      child: Text(
+                        "Login",
+                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                          color: Theme.of(context).colorScheme.primary,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
                   ],
                 ),
+
+
               ],
             ),
           ),
@@ -130,20 +171,28 @@ class RegisterScreen extends StatelessWidget {
     );
   }
 
-  Widget _socialIcon(String assetPath) {
-    return InkWell(
-      onTap: () {},
-      borderRadius: BorderRadius.circular(AppDimens.borderRadius.r),
-      child: Container(
-        width: AppDimens.socialIconSize.w,
-        height: AppDimens.socialIconSize.w,
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(AppDimens.borderRadius.r),
-          border: Border.all(color: Colors.grey.shade300),
-        ),
-        padding: EdgeInsets.all(AppDimens.socialIconPadding.w),
-        child: Image.asset(assetPath),
-      ),
-    );
-  }
+  // Widget _socialIcon(String assetPath) {
+  //   return Card(
+  //     shape: RoundedRectangleBorder(
+  //       borderRadius: BorderRadius.circular(AppDimens.borderRadius.r),
+  //       side: BorderSide(color: Colors.grey.shade300),
+  //     ),
+  //     elevation: 1,
+  //     margin: EdgeInsets.zero,
+  //     child: Padding(
+  //       padding: EdgeInsets.all(AppDimens.socialIconPadding.w),
+  //       child: ClipRRect(
+  //         borderRadius: BorderRadius.circular(AppDimens.borderRadius.r),
+  //         child: SvgPicture.asset(
+  //           assetPath,
+  //           width: AppDimens.socialIconSize.w - AppDimens.socialIconPadding.w * 2,
+  //           height: AppDimens.socialIconSize.w - AppDimens.socialIconPadding.w * 2,
+  //           fit: BoxFit.contain,
+  //         ),
+  //       ),
+  //     ),
+  //   );
+  // }
+
+
 }

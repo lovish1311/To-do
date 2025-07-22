@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:to_do/utils/constants.dart';
 import 'package:to_do/views/screens/app_shell.dart';
+import 'package:to_do/views/screens/login_screen.dart';
+import 'package:to_do/views/screens/register_screen.dart';
 import 'package:to_do/views/screens/task_detail_screen.dart';
 import 'package:to_do/views/screens/index_screen.dart';
 
@@ -11,7 +13,8 @@ final _shellNavigatorKey = GlobalKey<NavigatorState>();
 
 final GoRouter router = GoRouter(
   navigatorKey: _rootNavigatorKey,
-  initialLocation: AppConstants.indexPath,
+  // initialLocation: AppConstants.indexPath,
+  initialLocation: AppConstants.loginPath,
   routes: [
     ShellRoute(
       navigatorKey: _shellNavigatorKey,
@@ -49,6 +52,18 @@ final GoRouter router = GoRouter(
           task: id == 'new' ? null : null, // Replace with real fetch logic
         );
       },
+    ),
+    GoRoute(
+      path: AppConstants.loginPath,
+      name: 'login',
+      parentNavigatorKey: _rootNavigatorKey,
+      builder: (context, state) => const LoginScreen(),
+    ),
+    GoRoute(
+      path: AppConstants.registerPath,
+      name: 'register',
+      parentNavigatorKey: _rootNavigatorKey,
+      builder: (context, state) => const RegisterScreen(),
     ),
   ],
 );

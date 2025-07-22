@@ -23,7 +23,8 @@ class _IndexScreenState extends State<IndexScreen> {
   // _selectedTabIndex and _onTabTapped are moved to AppShell.
 
   void _navigateToEditTask(BuildContext context, Task task) {
-    context.go('/tasks/${task.id}');
+    // context.go('/tasks/${task.id}');
+    context.go('/register');
     print('Navigating to TaskDetailScreen to edit task: ${task.title}');
   }
 

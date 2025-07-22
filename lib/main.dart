@@ -76,15 +76,18 @@ class MyApp extends StatelessWidget {
       builder: (context, child) {
         return Consumer<ThemeViewModel>(
           builder: (context, themeViewModel, child) {
-            return MaterialApp(
+            return MaterialApp.router(
+            // return MaterialApp(
               debugShowCheckedModeBanner: false,
               title: 'To-Do App',
               theme: AppThemes.lightTheme(),
               darkTheme: AppThemes.darkTheme(),
+
               themeMode: themeViewModel.flutterThemeMode,
-              home: const LoginScreen(),
+              routerConfig: router
+              // home: const LoginScreen(),
               // home: const RegisterScreen(), // 🔁 TEMP: you can toggle to LoginScreen
-              // routerConfig: router, // 🔒 Later re-enable when auth complete
+
             );
           },
         );

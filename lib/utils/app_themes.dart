@@ -201,6 +201,7 @@ class AppThemes {
 // This file can be expanded with more layout constants as needed.
 class AppDimens {
   // Layout & Padding
+  static const double pagePadding = 24.0;
   static const double screenPadding = 16.0;
   static const double cardMargin = 12.0; // Margin between cards
   static const double listItemPadding = 16.0; // Horizontal padding for list items
@@ -225,7 +226,7 @@ class AppDimens {
 
   // Social Icons
   static const double socialIconSize = 48.0;
-  static const double socialIconPadding = 8.0;
+  static const double socialIconPadding = 2.0;
 
   // Spacing Constants (Generic)
   static const double extraSmallGap = 2.0;
