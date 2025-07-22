@@ -1,74 +1,65 @@
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/foundation.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:to_do/services/auth_service.dart';
 
 enum AuthStatus {
   uninitialized,
-  authenticating,
+  loading,
   authenticated,
   unauthenticated,
   error,
 }
 
 class AuthViewModel extends ChangeNotifier {
-  final FirebaseAuth _firebaseAuth = FirebaseAuth.instance;
-
+  final AuthService _authService;
   AuthStatus _status = AuthStatus.uninitialized;
   String? _errorMessage;
 
   AuthStatus get status => _status;
   String? get errorMessage => _errorMessage;
-  User? get currentUser => _firebaseAuth.currentUser;
+  User? get currentUser => _authService.currentUser;
 
-  AuthViewModel() {
-    _firebaseAuth.authStateChanges().listen(_onAuthStateChanged);
+  AuthViewModel({required AuthService authService}) : _authService = authService {
+    _authService.authStateChanges.listen(_onAuthStateChanged);
   }
 
   Future<void> login({required String email, required String password}) async {
-    _status = AuthStatus.authenticating;
-    notifyListeners();
+    _setStatus(AuthStatus.loading);
 
     try {
-      await _firebaseAuth.signInWithEmailAndPassword(
-        email: email.trim(),
-        password: password.trim(),
-      );
+      await _authService.signInWithEmail(email.trim(), password.trim());
       _errorMessage = null;
+      _setStatus(AuthStatus.authenticated);
     } on FirebaseAuthException catch (e) {
-      _status = AuthStatus.error;
       _errorMessage = _getFirebaseErrorMessage(e);
-      notifyListeners();
+      _setStatus(AuthStatus.error);
     }
   }
 
   Future<void> register({required String email, required String password}) async {
-    _status = AuthStatus.authenticating;
-    notifyListeners();
+    _setStatus(AuthStatus.loading);
 
     try {
-      await _firebaseAuth.createUserWithEmailAndPassword(
-        email: email.trim(),
-        password: password.trim(),
-      );
+      await _authService.registerWithEmail(email.trim(), password.trim());
       _errorMessage = null;
+      _setStatus(AuthStatus.authenticated);
     } on FirebaseAuthException catch (e) {
-      _status = AuthStatus.error;
       _errorMessage = _getFirebaseErrorMessage(e);
-      notifyListeners();
+      _setStatus(AuthStatus.error);
     }
   }
 
   Future<void> logout() async {
-    await _firebaseAuth.signOut();
-    _status = AuthStatus.unauthenticated;
-    notifyListeners();
+    await _authService.signOut();
+    _setStatus(AuthStatus.unauthenticated);
   }
 
   void _onAuthStateChanged(User? user) {
-    if (user == null) {
-      _status = AuthStatus.unauthenticated;
-    } else {
-      _status = AuthStatus.authenticated;
-    }
+    _setStatus(user == null ? AuthStatus.unauthenticated : AuthStatus.authenticated);
+  }
+
+  void _setStatus(AuthStatus status) {
+    _status = status;
     notifyListeners();
   }
 

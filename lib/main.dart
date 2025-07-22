@@ -28,9 +28,7 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
   // ✅ Initialize Firebase
-  await Firebase.initializeApp(
-    options: DefaultFirebaseOptions.currentPlatform,
-  );
+  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
 
   // ✅ Initialize local services
   await NotificationService().init();
@@ -60,13 +58,14 @@ void main() async {
         Provider<AuthService>(
           create: (_) => AuthService(),
         ),
-        ChangeNotifierProvider(
-          create: (_) => AuthViewModel(), // ✅ Provide AuthViewModel here
+        ChangeNotifierProvider<AuthViewModel>(
+          create: (ctx) => AuthViewModel(authService: ctx.read<AuthService>()),
         ),
       ],
       child: const MyApp(),
     ),
   );
+
 }
 
 class MyApp extends StatelessWidget {

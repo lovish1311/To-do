@@ -227,6 +227,26 @@ class AppDimens {
   // Social Icons
   static const double socialIconSize = 48.0;
   static const double socialIconPadding = 2.0;
+  /// Vertical gap above the title (i.e. before “Login” / “Register”)
+  static const double skipButtonTop = 16.0;
+
+  /// Vertical gap between the form and the primary button
+  static const double formToButton = 32.0;
+
+  /// Vertical gap between the primary button and the divider
+  static const double buttonToDivider = 32.0;
+
+  /// Vertical gap below the divider and above the social icons
+  static const double dividerToSocial = 24.0;
+
+  /// Vertical gap below the social‐icons row and above the “Have an account?” link
+  static const double socialToLink = 32.0;
+
+  /// Bottom padding at end of scroll view
+  static const double screenBottomPadding = 16.0;
+
+  /// Top padding for an error message shown under the button
+  static const double errorMessageTop = 12.0;
 
   // Spacing Constants (Generic)
   static const double extraSmallGap = 2.0;

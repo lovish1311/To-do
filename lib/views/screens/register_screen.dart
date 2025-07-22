@@ -3,13 +3,12 @@ import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
-import 'package:to_do/services/auth_service.dart';
 import 'package:to_do/utils/app_themes.dart';
 import 'package:to_do/utils/constants.dart';
+import 'package:to_do/viewmodels/auth_view_model.dart';
 import 'package:to_do/views/widgets/app_text_field.dart';
 import 'package:to_do/views/widgets/social_icon.dart';
 import 'package:flutter/gestures.dart';
-
 
 class RegisterScreen extends StatefulWidget {
   const RegisterScreen({super.key});
@@ -23,7 +22,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
   final _confirmController = TextEditingController();
-  bool _isLoading = false;
 
   @override
   void dispose() {
@@ -33,39 +31,48 @@ class _RegisterScreenState extends State<RegisterScreen> {
     super.dispose();
   }
 
-  String? _validateEmail(String? v) {
-    if (v == null || v.isEmpty) return 'Please enter your email';
-    if (!RegExp(r'^[^@]+@[^@]+\.[^@]+').hasMatch(v)) return 'Enter a valid email';
+  String? _validateEmail(String? value) {
+    if (value == null || value.trim().isEmpty) {
+      return 'Please enter your email';
+    }
+    final emailRegex = RegExp(r'^[^@]+@[^@]+\.[^@]+');
+    if (!emailRegex.hasMatch(value.trim())) {
+      return 'Enter a valid email';
+    }
     return null;
   }
 
-  String? _validatePassword(String? v) {
-    if (v == null || v.isEmpty) return 'Please enter your password';
-    if (v.length < 6) return 'Must be at least 6 characters';
+  String? _validatePassword(String? value) {
+    if (value == null || value.trim().isEmpty) {
+      return 'Please enter your password';
+    }
+    if (value.trim().length < 6) {
+      return 'Password must be at least 6 characters';
+    }
     return null;
   }
 
-  String? _validateConfirm(String? v) {
-    if (v != _passwordController.text) return 'Passwords do not match';
+  String? _validateConfirm(String? value) {
+    if (value != _passwordController.text) {
+      return 'Passwords do not match';
+    }
     return null;
   }
 
   Future<void> _register() async {
-    if (!(_formKey.currentState?.validate() ?? false)) return;
+    if (!_formKey.currentState!.validate()) return;
 
-    setState(() => _isLoading = true);
-    final auth = context.read<AuthService>();
-    try {
-      await auth.registerWithEmail(
-        _emailController.text.trim(),
-        _passwordController.text,
-      );
-      context.goNamed('index');
-    } catch (e) {
-      ScaffoldMessenger.of(context)
-          .showSnackBar(SnackBar(content: Text(e.toString())));
-    } finally {
-      if (mounted) setState(() => _isLoading = false);
+    final authViewModel = context.read<AuthViewModel>();
+    final email = _emailController.text.trim();
+    final password = _passwordController.text.trim();
+
+    await authViewModel.register(email: email, password: password);
+
+    if (authViewModel.status == AuthStatus.authenticated) {
+      context.go(AppConstants.indexPath); // Navigate to index screen
+    } else {
+      final error = authViewModel.errorMessage ?? 'Registration failed';
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(error)));
     }
   }
 
@@ -73,6 +80,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
     final tt = Theme.of(context).textTheme;
+    final authViewModel = context.watch<AuthViewModel>();
+    final isLoading = authViewModel.status == AuthStatus.loading;
 
     return Scaffold(
       backgroundColor: cs.background,
@@ -80,14 +89,13 @@ class _RegisterScreenState extends State<RegisterScreen> {
         value: SystemUiOverlayStyle.dark.copyWith(statusBarColor: Colors.transparent),
         child: SingleChildScrollView(
           padding: EdgeInsets.symmetric(
-            horizontal: AppDimens.screenHorizontalPadding.w,
-            vertical: AppDimens.screenVerticalPadding.h,
+            horizontal: AppDimens.screenHorizontalPadding,
+            vertical: AppDimens.screenVerticalPadding,
           ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               SizedBox(height: AppDimens.paddingTopAfterStatusBar.h),
-
               Text('Register', style: tt.headlineMedium?.copyWith(fontWeight: FontWeight.bold)),
               SizedBox(height: AppDimens.fieldSpacing.h),
               Text('Create your account to get started', style: tt.bodyMedium),
@@ -102,7 +110,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                       controller: _emailController,
                       keyboardType: TextInputType.emailAddress,
                       validator: _validateEmail,
-                      enabled: !_isLoading,
+                      enabled: !isLoading,
                     ),
                     SizedBox(height: AppDimens.fieldSpacing.h),
                     AppTextField(
@@ -110,7 +118,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                       controller: _passwordController,
                       obscureText: true,
                       validator: _validatePassword,
-                      enabled: !_isLoading,
+                      enabled: !isLoading,
                     ),
                     SizedBox(height: AppDimens.fieldSpacing.h),
                     AppTextField(
@@ -118,7 +126,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                       controller: _confirmController,
                       obscureText: true,
                       validator: _validateConfirm,
-                      enabled: !_isLoading,
+                      enabled: !isLoading,
                     ),
                   ],
                 ),
@@ -129,14 +137,14 @@ class _RegisterScreenState extends State<RegisterScreen> {
                 width: double.infinity,
                 height: AppDimens.buttonHeight.h,
                 child: ElevatedButton(
-                  onPressed: _isLoading ? null : _register,
+                  onPressed: isLoading ? null : _register,
                   style: ElevatedButton.styleFrom(
                     backgroundColor: cs.primary,
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(AppDimens.borderRadius.r),
                     ),
                   ),
-                  child: _isLoading
+                  child: isLoading
                       ? CircularProgressIndicator(valueColor: AlwaysStoppedAnimation(cs.onPrimary))
                       : Text('Register', style: tt.titleMedium?.copyWith(color: cs.onPrimary)),
                 ),
@@ -160,12 +168,16 @@ class _RegisterScreenState extends State<RegisterScreen> {
                 children: [
                   SocialIconButton(
                     assetPath: AppSvg.googleIconPath,
-                    onTap: _isLoading ? (){} : () {/* google */},
+                    onTap: isLoading ? (){}  : () {
+                      // TODO: Integrate Google Sign-In
+                    },
                   ),
                   SizedBox(width: AppDimens.fieldSpacing.w * 1.5),
                   SocialIconButton(
                     assetPath: AppSvg.appleIconPath,
-                    onTap:_isLoading ? (){} : () {/* apple */},
+                    onTap: isLoading ? (){} : () {
+                      // TODO: Integrate Apple Sign-In
+                    },
                   ),
                 ],
               ),
@@ -174,13 +186,14 @@ class _RegisterScreenState extends State<RegisterScreen> {
               Center(
                 child: RichText(
                   text: TextSpan(
-                    text: "Already have an account? ",
+                    text: 'Already have an account? ',
                     style: tt.bodyMedium?.copyWith(color: cs.onBackground),
                     children: [
                       TextSpan(
                         text: 'Login',
                         style: tt.bodyMedium?.copyWith(color: cs.primary, fontWeight: FontWeight.bold),
-                        recognizer: TapGestureRecognizer()..onTap = () => context.goNamed('login'),
+                        recognizer: TapGestureRecognizer()
+                          ..onTap = () => context.goNamed('login'),
                       ),
                     ],
                   ),
