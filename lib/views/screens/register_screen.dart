@@ -2,197 +2,194 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
+import 'package:provider/provider.dart';
+import 'package:to_do/services/auth_service.dart';
 import 'package:to_do/utils/app_themes.dart';
-import 'package:flutter_svg/flutter_svg.dart';
-import 'package:to_do/utils/constants.dart'; // For AppSvg
+import 'package:to_do/utils/constants.dart';
+import 'package:to_do/views/widgets/app_text_field.dart';
 import 'package:to_do/views/widgets/social_icon.dart';
+import 'package:flutter/gestures.dart';
 
 
-import '../widgets/app_text_field.dart';
-
-class RegisterScreen extends StatelessWidget {
+class RegisterScreen extends StatefulWidget {
   const RegisterScreen({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final emailController = TextEditingController();
-    final passwordController = TextEditingController();
-    final confirmPasswordController = TextEditingController();
-    final formKey = GlobalKey<FormState>();
+  State<RegisterScreen> createState() => _RegisterScreenState();
+}
 
-    // Remove status bar
-    SystemChrome.setSystemUIOverlayStyle(
-      const SystemUiOverlayStyle(
-        statusBarColor: Colors.transparent,
-        statusBarIconBrightness: Brightness.dark,
-      ),
-    );
+class _RegisterScreenState extends State<RegisterScreen> {
+  final _formKey = GlobalKey<FormState>();
+  final _emailController = TextEditingController();
+  final _passwordController = TextEditingController();
+  final _confirmController = TextEditingController();
+  bool _isLoading = false;
+
+  @override
+  void dispose() {
+    _emailController.dispose();
+    _passwordController.dispose();
+    _confirmController.dispose();
+    super.dispose();
+  }
+
+  String? _validateEmail(String? v) {
+    if (v == null || v.isEmpty) return 'Please enter your email';
+    if (!RegExp(r'^[^@]+@[^@]+\.[^@]+').hasMatch(v)) return 'Enter a valid email';
+    return null;
+  }
+
+  String? _validatePassword(String? v) {
+    if (v == null || v.isEmpty) return 'Please enter your password';
+    if (v.length < 6) return 'Must be at least 6 characters';
+    return null;
+  }
+
+  String? _validateConfirm(String? v) {
+    if (v != _passwordController.text) return 'Passwords do not match';
+    return null;
+  }
+
+  Future<void> _register() async {
+    if (!(_formKey.currentState?.validate() ?? false)) return;
+
+    setState(() => _isLoading = true);
+    final auth = context.read<AuthService>();
+    try {
+      await auth.registerWithEmail(
+        _emailController.text.trim(),
+        _passwordController.text,
+      );
+      context.goNamed('index');
+    } catch (e) {
+      ScaffoldMessenger.of(context)
+          .showSnackBar(SnackBar(content: Text(e.toString())));
+    } finally {
+      if (mounted) setState(() => _isLoading = false);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+    final tt = Theme.of(context).textTheme;
 
     return Scaffold(
-      backgroundColor: theme.scaffoldBackgroundColor,
+      backgroundColor: cs.background,
       body: AnnotatedRegion<SystemUiOverlayStyle>(
-        value: const SystemUiOverlayStyle(statusBarColor: Colors.transparent),
-        child: Padding(
-          padding: EdgeInsets.symmetric(horizontal: AppDimens.screenPadding.w).copyWith(
-            top: MediaQuery.of(context).padding.top + AppDimens.paddingTopAfterStatusBar.h,
+        value: SystemUiOverlayStyle.dark.copyWith(statusBarColor: Colors.transparent),
+        child: SingleChildScrollView(
+          padding: EdgeInsets.symmetric(
+            horizontal: AppDimens.screenHorizontalPadding.w,
+            vertical: AppDimens.screenVerticalPadding.h,
           ),
-          child: Form(
-            key: formKey,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                SizedBox(height: AppDimens.titleTopSpacing.h),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              SizedBox(height: AppDimens.paddingTopAfterStatusBar.h),
 
-                Text(
-                  'Register',
-                  style: theme.textTheme.headlineMedium?.copyWith(fontWeight: FontWeight.bold),
-                ),
+              Text('Register', style: tt.headlineMedium?.copyWith(fontWeight: FontWeight.bold)),
+              SizedBox(height: AppDimens.fieldSpacing.h),
+              Text('Create your account to get started', style: tt.bodyMedium),
+              SizedBox(height: AppDimens.formTopSpacing.h),
 
-                SizedBox(height: AppDimens.titleBottomSpacing.h),
-
-                Text(
-                  'Create your account to get started',
-                  style: theme.textTheme.bodyMedium,
-                ),
-
-                SizedBox(height: AppDimens.formTopSpacing.h),
-
-                AppTextField(
-                  label: 'Email',
-                  controller: emailController,
-                  keyboardType: TextInputType.emailAddress,
-                ),
-                SizedBox(height: AppDimens.fieldSpacing.h),
-
-                AppTextField(
-                  label: 'Password',
-                  controller: passwordController,
-                  obscureText: true,
-                ),
-                SizedBox(height: AppDimens.fieldSpacing.h),
-
-                AppTextField(
-                  label: 'Confirm Password',
-                  controller: confirmPasswordController,
-                  obscureText: true,
-                ),
-                SizedBox(height: AppDimens.fieldSpacing.h * 1.5),
-
-                SizedBox(
-                  width: double.infinity,
-                  height: AppDimens.buttonHeight.h,
-                  child: ElevatedButton(
-                    onPressed: () {
-                      if (formKey.currentState!.validate()) {
-                        // Perform registration logic here
-                      }
-                    },
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: theme.colorScheme.primary,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(AppDimens.borderRadius.r),
-                      ),
-                    ),
-                    child: Text(
-                      'Register',
-                      style: theme.textTheme.titleMedium?.copyWith(color: Colors.white),
-                    ),
-                  ),
-                ),
-
-                SizedBox(height: AppDimens.dividerSpacing.h),
-
-                Row(
+              Form(
+                key: _formKey,
+                child: Column(
                   children: [
-                    const Expanded(child: Divider()),
-                    Padding(
-                      padding: EdgeInsets.symmetric(horizontal: AppDimens.dividerTextPadding.w),
-                      child: Text(
-                        'Or register with',
-                        style: theme.textTheme.bodySmall,
-                      ),
+                    AppTextField(
+                      label: 'Email',
+                      controller: _emailController,
+                      keyboardType: TextInputType.emailAddress,
+                      validator: _validateEmail,
+                      enabled: !_isLoading,
                     ),
-                    const Expanded(child: Divider()),
+                    SizedBox(height: AppDimens.fieldSpacing.h),
+                    AppTextField(
+                      label: 'Password',
+                      controller: _passwordController,
+                      obscureText: true,
+                      validator: _validatePassword,
+                      enabled: !_isLoading,
+                    ),
+                    SizedBox(height: AppDimens.fieldSpacing.h),
+                    AppTextField(
+                      label: 'Confirm Password',
+                      controller: _confirmController,
+                      obscureText: true,
+                      validator: _validateConfirm,
+                      enabled: !_isLoading,
+                    ),
                   ],
                 ),
+              ),
 
-                SizedBox(height: AppDimens.fieldSpacing.h * 1.5),
+              SizedBox(height: AppDimens.fieldSpacing.h * 1.5),
+              SizedBox(
+                width: double.infinity,
+                height: AppDimens.buttonHeight.h,
+                child: ElevatedButton(
+                  onPressed: _isLoading ? null : _register,
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: cs.primary,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(AppDimens.borderRadius.r),
+                    ),
+                  ),
+                  child: _isLoading
+                      ? CircularProgressIndicator(valueColor: AlwaysStoppedAnimation(cs.onPrimary))
+                      : Text('Register', style: tt.titleMedium?.copyWith(color: cs.onPrimary)),
+                ),
+              ),
 
+              SizedBox(height: AppDimens.dividerSpacing.h),
+              Row(
+                children: [
+                  const Expanded(child: Divider()),
+                  Padding(
+                    padding: EdgeInsets.symmetric(horizontal: AppDimens.dividerTextPadding.w),
+                    child: Text('Or register with', style: tt.bodySmall),
+                  ),
+                  const Expanded(child: Divider()),
+                ],
+              ),
+
+              SizedBox(height: AppDimens.fieldSpacing.h * 1.5),
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   SocialIconButton(
                     assetPath: AppSvg.googleIconPath,
-                    onTap: () {
-                      // TODO: Google sign-in logic
-                    },
+                    onTap: _isLoading ? (){} : () {/* google */},
                   ),
                   SizedBox(width: AppDimens.fieldSpacing.w * 1.5),
                   SocialIconButton(
                     assetPath: AppSvg.appleIconPath,
-                    onTap: () {
-                      // TODO: Apple sign-in logic
-                    },
+                    onTap:_isLoading ? (){} : () {/* apple */},
                   ),
                 ],
               ),
 
-                SizedBox(height: AppDimens.fieldSpacing.h * 1.8),
-
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Text(
-                      "Already have an account? ",
-                      style: Theme.of(context).textTheme.bodyMedium,
-                    ),
-                    GestureDetector(
-                      onTap: () {
-                       context.go('/login'); // or use context.go('/login') if using go_router
-                      },
-                      child: Text(
-                        "Login",
-                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                          color: Theme.of(context).colorScheme.primary,
-                          fontWeight: FontWeight.bold,
-                        ),
+              SizedBox(height: AppDimens.fieldSpacing.h * 1.8),
+              Center(
+                child: RichText(
+                  text: TextSpan(
+                    text: "Already have an account? ",
+                    style: tt.bodyMedium?.copyWith(color: cs.onBackground),
+                    children: [
+                      TextSpan(
+                        text: 'Login',
+                        style: tt.bodyMedium?.copyWith(color: cs.primary, fontWeight: FontWeight.bold),
+                        recognizer: TapGestureRecognizer()..onTap = () => context.goNamed('login'),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
-
-
-              ],
-            ),
+              ),
+            ],
           ),
         ),
       ),
     );
   }
-
-  // Widget _socialIcon(String assetPath) {
-  //   return Card(
-  //     shape: RoundedRectangleBorder(
-  //       borderRadius: BorderRadius.circular(AppDimens.borderRadius.r),
-  //       side: BorderSide(color: Colors.grey.shade300),
-  //     ),
-  //     elevation: 1,
-  //     margin: EdgeInsets.zero,
-  //     child: Padding(
-  //       padding: EdgeInsets.all(AppDimens.socialIconPadding.w),
-  //       child: ClipRRect(
-  //         borderRadius: BorderRadius.circular(AppDimens.borderRadius.r),
-  //         child: SvgPicture.asset(
-  //           assetPath,
-  //           width: AppDimens.socialIconSize.w - AppDimens.socialIconPadding.w * 2,
-  //           height: AppDimens.socialIconSize.w - AppDimens.socialIconPadding.w * 2,
-  //           fit: BoxFit.contain,
-  //         ),
-  //       ),
-  //     ),
-  //   );
-  // }
-
-
 }

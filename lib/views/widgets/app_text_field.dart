@@ -14,6 +14,7 @@ class AppTextField extends StatefulWidget {
   final bool obscureText;
   final Widget? suffixIcon;
   final int maxLines;
+  final bool enabled;
   final TextInputAction? textInputAction;
 
   const AppTextField({
@@ -28,6 +29,7 @@ class AppTextField extends StatefulWidget {
     this.suffixIcon,
     this.maxLines = 1,
     this.textInputAction,
+    this.enabled = true, // default to true
   }) : super(key: key);
 
   @override
@@ -52,6 +54,7 @@ class _AppTextFieldState extends State<AppTextField> {
       controller: widget.controller,
       keyboardType: widget.keyboardType ?? TextInputType.text,
       obscureText: _obscure,
+      enabled: widget.enabled,
       maxLines: widget.maxLines,
       textInputAction: widget.textInputAction,
       inputFormatters: widget.inputFormatters,

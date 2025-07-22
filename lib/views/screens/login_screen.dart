@@ -6,7 +6,8 @@ import 'package:to_do/utils/app_themes.dart';
 import 'package:to_do/utils/constants.dart';
 import 'package:to_do/views/widgets/app_text_field.dart';
 import 'package:to_do/views/widgets/social_icon.dart';
-
+import 'package:provider/provider.dart';
+import 'package:to_do/services/auth_service.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -16,65 +17,72 @@ class LoginScreen extends StatefulWidget {
 }
 
 class _LoginScreenState extends State<LoginScreen> {
-  final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
-  final TextEditingController _emailController = TextEditingController();
-  final TextEditingController _passwordController = TextEditingController();
-
+  final _formKey = GlobalKey<FormState>();
+  final _emailController = TextEditingController();
+  final _passwordController = TextEditingController();
   bool _isLoading = false;
 
-  void _login() {
-    if (_formKey.currentState?.validate() ?? false) {
-      setState(() => _isLoading = true);
+  @override
+  void dispose() {
+    _emailController.dispose();
+    _passwordController.dispose();
+    super.dispose();
+  }
 
-      Future.delayed(const Duration(seconds: 2), () {
-        setState(() => _isLoading = false);
-        // TODO: Navigate on successful login
-      });
+  String? _validateEmail(String? v) {
+    if (v == null || v.isEmpty) return 'Please enter your email';
+    if (!RegExp(r'^[^@]+@[^@]+\.[^@]+').hasMatch(v)) return 'Enter a valid email';
+    return null;
+  }
+
+  String? _validatePassword(String? v) {
+    if (v == null || v.isEmpty) return 'Please enter your password';
+    if (v.length < 6) return 'Must be at least 6 characters';
+    return null;
+  }
+
+  Future<void> _login() async {
+    if (!(_formKey.currentState?.validate() ?? false)) return;
+
+    setState(() => _isLoading = true);
+    final auth = context.read<AuthService>();
+    try {
+      await auth.signInWithEmail(_emailController.text.trim(), _passwordController.text);
+      // On success, navigate (go_router redirect will handle)
+      context.goNamed('index');
+    } catch (e) {
+      ScaffoldMessenger.of(context)
+          .showSnackBar(SnackBar(content: Text(e.toString())));
+    } finally {
+      if (mounted) setState(() => _isLoading = false);
     }
   }
 
-  Widget _socialIcon(String assetPath) {
-    return Container(
-      width: 40.w,
-      height: 40.w,
-      padding: EdgeInsets.all(8.w),
-      decoration: BoxDecoration(
-        shape: BoxShape.circle,
-        border: Border.all(color: AppColorsLight.textColor),
-      ),
-      child:SvgPicture.asset(
-        assetPath,
-
-        fit: BoxFit.contain,
-      ),
-    );
-  }
-
   Widget _orDivider(BuildContext context) {
-    final color = AppColorsLight.textColor;
+    final color = AppColorsLight.subTextColor;
     return Row(
       children: [
         Expanded(child: Divider(color: color)),
         Padding(
           padding: EdgeInsets.symmetric(horizontal: 8.w),
-          child: Text(
-            'or login with',
-            style: Theme.of(context).textTheme.bodySmall?.copyWith(
-              color: AppColorsLight.subTextColor,
-            ),
-          ),
+          child: Text('or login with',
+              style: Theme.of(context)
+                  .textTheme
+                  .bodySmall
+                  ?.copyWith(color: color)),
         ),
         Expanded(child: Divider(color: color)),
       ],
     );
   }
+
   @override
   Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
-    final textTheme = Theme.of(context).textTheme;
+    final cs = Theme.of(context).colorScheme;
+    final tt = Theme.of(context).textTheme;
 
     return Scaffold(
-      body: SafeArea( // Fix SafeArea here
+      body: SafeArea(
         child: SingleChildScrollView(
           padding: EdgeInsets.symmetric(
             horizontal: AppDimens.screenHorizontalPadding.w,
@@ -82,13 +90,11 @@ class _LoginScreenState extends State<LoginScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              SizedBox(height: 16.h), // Small top spacing only
-
-              // Skip button
+              SizedBox(height: 16.h),
               Align(
                 alignment: Alignment.topRight,
                 child: TextButton(
-                  onPressed: () => context.goNamed('index'),
+                  onPressed: _isLoading ? null : () => context.goNamed('index'),
                   child: Text(
                     'Skip',
                     style: AppTextStyles.bodyMedium.copyWith(
@@ -97,16 +103,10 @@ class _LoginScreenState extends State<LoginScreen> {
                   ),
                 ),
               ),
-
               SizedBox(height: 8.h),
-
-              Text(
-                'Login',
-                style: textTheme.headlineMedium?.copyWith(
-                  color: colorScheme.primary,
-                ),
-              ),
-
+              Text('Login',
+                  style:
+                  tt.headlineMedium?.copyWith(color: cs.primary)),
               SizedBox(height: 24.h),
 
               Form(
@@ -117,6 +117,8 @@ class _LoginScreenState extends State<LoginScreen> {
                       label: 'Email',
                       controller: _emailController,
                       keyboardType: TextInputType.emailAddress,
+                      enabled: !_isLoading,
+                      validator: _validateEmail,
                     ),
                     SizedBox(height: 16.h),
                     AppTextField(
@@ -124,6 +126,8 @@ class _LoginScreenState extends State<LoginScreen> {
                       controller: _passwordController,
                       obscureText: true,
                       textInputAction: TextInputAction.done,
+                      enabled: !_isLoading,
+                      validator: _validatePassword,
                     ),
                   ],
                 ),
@@ -134,23 +138,21 @@ class _LoginScreenState extends State<LoginScreen> {
                 width: double.infinity,
                 height: AppDimens.buttonHeight.h,
                 child: ElevatedButton(
+                  onPressed: _isLoading ? null : _login,
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: colorScheme.primary,
+                    backgroundColor: cs.primary,
                     shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(AppDimens.cardBorderRadius.r),
+                      borderRadius:
+                      BorderRadius.circular(AppDimens.cardBorderRadius.r),
                     ),
                   ),
-                  onPressed: _isLoading ? null : _login,
                   child: _isLoading
                       ? CircularProgressIndicator(
-                    valueColor: AlwaysStoppedAnimation(colorScheme.onPrimary),
-                  )
-                      : Text(
-                    'Login',
-                    style: textTheme.labelLarge?.copyWith(
-                      color: colorScheme.onPrimary,
-                    ),
-                  ),
+                      valueColor:
+                      AlwaysStoppedAnimation(cs.onPrimary))
+                      : Text('Login',
+                      style: tt.labelLarge
+                          ?.copyWith(color: cs.onPrimary)),
                 ),
               ),
 
@@ -163,16 +165,12 @@ class _LoginScreenState extends State<LoginScreen> {
                 children: [
                   SocialIconButton(
                     assetPath: AppSvg.googleIconPath,
-                    onTap: () {
-                      // TODO: Handle Google login
-                    },
+                    onTap: _isLoading ? (){} : () {/* Google */},
                   ),
                   SizedBox(width: 24.w),
                   SocialIconButton(
                     assetPath: AppSvg.appleIconPath,
-                    onTap: () {
-                      // TODO: Handle Apple login
-                    },
+                      onTap: _isLoading ? (){} : () {/* apple */},
                   ),
                 ],
               ),
@@ -180,29 +178,28 @@ class _LoginScreenState extends State<LoginScreen> {
               SizedBox(height: 32.h),
               Center(
                 child: TextButton(
-                  onPressed: () => context.push(AppConstants.registerPath),
+                  onPressed:
+                  _isLoading ? null : () => context.push(AppConstants.registerPath),
                   child: Text.rich(
                     TextSpan(
                       text: "Don’t have an account? ",
-                      style: textTheme.bodyMedium?.copyWith(color: Colors.black),
+                      style: tt.bodyMedium?.copyWith(color: cs.onBackground),
                       children: [
                         TextSpan(
                           text: "Register",
-                          style: textTheme.bodyMedium?.copyWith(
-                            color: AppColorsLight.primaryColor,
-                          ),
-                        ),
+                          style: tt.bodyMedium
+                              ?.copyWith(color: cs.primary),
+                        )
                       ],
                     ),
                   ),
                 ),
               ),
-              SizedBox(height: 16.h), // bottom spacing
+              SizedBox(height: 16.h),
             ],
           ),
         ),
       ),
     );
   }
-
 }
