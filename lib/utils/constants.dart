@@ -15,6 +15,7 @@ class AppConstants {
   static const String profilePath     = '/profile';
   static const String registerPath = '/register';
   static const String loginPath = '/login';
+  static const String splashPath = '/';
 
 
 }
@@ -23,4 +24,5 @@ class AppSvg{
   static const String googleIconPath = 'assets/icons/google_icon.svg';
   static const String facebookIconPath = 'assets/icons/facebook_icon.svg';
   static const String appleIconPath = 'assets/icons/apple_icon.svg';
+  static const String grootLogoPath = 'assets/icons/groot_logo.svg';
 }

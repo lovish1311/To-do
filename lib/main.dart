@@ -18,7 +18,7 @@ import 'package:to_do/services/auth_service.dart';
 import 'package:to_do/viewmodels/task_list_view_model.dart';
 import 'package:to_do/viewmodels/task_view_model.dart';
 import 'package:to_do/viewmodels/theme_view_model.dart';
-import 'package:to_do/viewmodels/auth_view_model.dart'; // ✅ Add this line
+import 'package:to_do/viewmodels/auth_view_model.dart';
 
 import 'package:to_do/utils/constants.dart';
 import 'package:to_do/utils/app_themes.dart';
@@ -29,6 +29,7 @@ void main() async {
 
   // ✅ Initialize Firebase
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
+  print("✅ Firebase Initialized");
 
   // ✅ Initialize local services
   await NotificationService().init();

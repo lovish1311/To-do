@@ -64,8 +64,7 @@ class AppTextStyles {
   );
 }
 
-// --- App Themes Definition ---
-// This class provides the light and dark ThemeData objects.
+
 class AppThemes {
   // Light Theme Configuration
   static ThemeData lightTheme() {

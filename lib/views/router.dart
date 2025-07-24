@@ -4,6 +4,7 @@ import 'package:to_do/utils/constants.dart';
 import 'package:to_do/views/screens/app_shell.dart';
 import 'package:to_do/views/screens/login_screen.dart';
 import 'package:to_do/views/screens/register_screen.dart';
+import 'package:to_do/views/screens/splash_screen.dart';
 import 'package:to_do/views/screens/task_detail_screen.dart';
 import 'package:to_do/views/screens/index_screen.dart';
 
@@ -14,7 +15,7 @@ final _shellNavigatorKey = GlobalKey<NavigatorState>();
 final GoRouter router = GoRouter(
   navigatorKey: _rootNavigatorKey,
   // initialLocation: AppConstants.indexPath,
-  initialLocation: AppConstants.loginPath,
+  initialLocation: AppConstants.splashPath,
   routes: [
     ShellRoute(
       navigatorKey: _shellNavigatorKey,
@@ -42,6 +43,11 @@ final GoRouter router = GoRouter(
         ),
       ],
     ),
+    GoRoute(
+      path: AppConstants.splashPath,
+      builder: (context, state) => const SplashScreen(),
+    ),
+
     GoRoute(
       path: AppConstants.taskDetailPath,
       name: 'taskDetail',
