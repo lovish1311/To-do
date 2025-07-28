@@ -5,11 +5,8 @@ import 'package:to_do/models/task.dart';
 import 'package:to_do/viewmodels/task_view_model.dart';
 import 'package:to_do/viewmodels/theme_view_model.dart'; // Re-import ThemeViewModel for its AppBar
 import 'package:to_do/utils/app_themes.dart';
-// CustomBottomNavBar is still not used directly here
-// import 'package:to_do/views/widgets/custom_bottom_nav_bar.dart';
 import 'package:to_do/views/widgets/task_card.dart';
 import 'package:to_do/views/widgets/completed_tasks_section.dart';
-import 'package:to_do/views/screens/task_detail_screen.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:go_router/go_router.dart';
 class IndexScreen extends StatefulWidget {

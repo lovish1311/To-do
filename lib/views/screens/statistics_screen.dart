@@ -13,7 +13,6 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
 
   @override
   Widget build(BuildContext context) {
-    // Temporary placeholder values
     final int tasksCompletedToday = 5;
 
     return Scaffold(
@@ -32,7 +31,6 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
 
             const SizedBox(height: 12),
 
-            // Placeholder bar chart for daywise completion
             Container(
               height: 150,
               width: double.infinity,
@@ -49,7 +47,6 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
 
             const SizedBox(height: 24),
 
-            // Toggle button
             ListTile(
               title: const Text('Show Weekly Breakdown'),
               trailing: Icon(
