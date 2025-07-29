@@ -5,18 +5,24 @@ class AppConstants {
   static const String taskListBox = 'task_lists';
   static const String taskBox = 'tasks';
 
-// Other constants can go here later, e.g.:
-// static const String appName = 'My To-Do App';
-// static const String defaultTheme = 'system';
-  static const String indexPath        = '/tasks';
-  static const String taskDetailPath  = '/tasks/:id';
-  static const String calendarPath    = '/calendar';
-  static const String focusPath       = '/focus';
-  static const String profilePath     = '/profile';
-  static const String registerPath = '/register';
-  static const String loginPath = '/login';
   static const String splashPath = '/';
+  static const String indexPath = '/index';
+  static const String calendarPath = '/calendar';
+  static const String focusPath = '/focus';
+  static const String profilePath = '/profile';
+  static const String taskDetailPath = '/task-detail/:id';
+  static const String loginPath = '/login';
+  static const String registerPath = '/register';
 
+  // Route Names (stringified for navigation and consistency)
+  static const String splashRouteName = 'splash';
+  static const String indexRouteName = 'index';
+  static const String calendarRouteName = 'calendar';
+  static const String focusRouteName = 'focus';
+  static const String profileRouteName = 'profile';
+  static const String taskDetailRouteName = 'taskDetail';
+  static const String loginRouteName = 'login';
+  static const String registerRouteName = 'register';
 
 }
 

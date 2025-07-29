@@ -255,9 +255,9 @@ class AppDimens {
 
   // Form Spacing (used in Login/Register)
   static const double formTopSpacing = 32.0;
-  static const double fieldSpacing = 16.0;
+  static const double fieldSpacing = 30.0;
   static const double titleTopSpacing = 24.0;
-  static const double titleBottomSpacing = 8.0;
+  static const double titleBottomSpacing = 50.0;
   static const double dividerSpacing = 32.0;
   static const double dividerTextPadding = 12.0;
 
@@ -271,5 +271,7 @@ class AppDimens {
   static const double paddingTopAfterStatusBar = 16.0;
 
   static double screenVerticalPadding = 24.0.h; // Top/bottom padding
-  static double screenHorizontalPadding = 20.0.w; // Left/right padding
+  static double screenHorizontalPadding = 20.0.w;
+
+  static var screenTopPadding=40; // Left/right padding
 }
