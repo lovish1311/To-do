@@ -230,7 +230,7 @@ class AppDimens {
   static const double skipButtonTop = 16.0;
 
   /// Vertical gap between the form and the primary button
-  static const double formToButton = 32.0;
+  static const double formToButton = 50.0;
 
   /// Vertical gap between the primary button and the divider
   static const double buttonToDivider = 32.0;

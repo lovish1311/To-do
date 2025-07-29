@@ -76,7 +76,7 @@ class _LoginScreenState extends State<LoginScreen> {
                         style: tt.headlineMedium?.copyWith(color: cs.primary),
                       ),
                       TextButton(
-                        onPressed: isLoading ? null : () => context.goNamed(AppConstants.indexPath),
+                        onPressed: isLoading ? null : () => context.goNamed(AppConstants.indexRouteName),
                         child: Text(
                           AppStrings.skipButton,
                           style: tt.bodyMedium?.copyWith(color: cs.primary),

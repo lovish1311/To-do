@@ -30,7 +30,7 @@ class _SocialLoginButtonsState extends State<SocialLoginButtons> {
         debugPrint("✅ Google sign-in successful");
         debugPrint("ID Token: ${auth.idToken}");
         debugPrint("Access Token: ${auth.accessToken}");
-        context.go(AppConstants.indexPath);
+        context.goNamed(AppConstants.indexRouteName);
       } else {
         debugPrint("⚠️ Google sign-in cancelled");
       }

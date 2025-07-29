@@ -10,6 +10,7 @@ import 'package:to_do/viewmodels/auth_view_model.dart';
 import 'package:to_do/views/widgets/app_text_field.dart';
 import 'package:to_do/views/widgets/social_icon.dart';
 import 'package:flutter/gestures.dart';
+import 'package:to_do/views/widgets/social_login_buttons.dart';
 
 class RegisterScreen extends StatefulWidget {
   const RegisterScreen({super.key});
@@ -190,21 +191,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                 SizedBox(height: AppDimens.dividerToSocial.h),
 
                 // Social Login Buttons
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    SocialIconButton(
-                      assetPath: AppSvg.googleIconPath,
-                      onTap: isLoading ? (){} : () {}, // TODO: Integrate Google Sign-In
-                    ),
-                    SizedBox(width: AppDimens.fieldSpacing.w * 1.5),
-                    SocialIconButton(
-                      assetPath: AppSvg.appleIconPath,
-                      onTap: isLoading ? (){} : () {}, // TODO: Integrate Apple Sign-In
-                    ),
-                  ],
-                ),
-
+                const SocialLoginButtons(),
                 SizedBox(height: AppDimens.socialToLink.h),
 
                 Center(
