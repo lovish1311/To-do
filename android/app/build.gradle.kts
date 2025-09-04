@@ -53,6 +53,7 @@ dependencies {
     coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:2.1.4")
     //Firebase Authentication (already in your Flutter side)
     implementation("com.google.firebase:firebase-auth-ktx")
+    implementation("com.google.firebase:firebase-functions:22.0.0")
 
     // Google Sign-In for Firebase
     implementation("com.google.android.gms:play-services-auth:20.7.0")
