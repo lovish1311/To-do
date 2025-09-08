@@ -59,6 +59,7 @@ class AppShell extends StatelessWidget {
         // onPressed: () => context.push(AppConstants.loginPath)
         ,
         child: const Icon(Icons.add),
+        shape: CircleBorder(),
       )
           : null,
       floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
