@@ -106,6 +106,44 @@ class Task extends HiveObject {
       wishTaskCompletionStatus: wishTaskCompletionStatus ?? this.wishTaskCompletionStatus,
     );
   }
+  factory Task.fromJson(Map<String, dynamic> json) {
+    return Task(
+      id: json['id'] as String,
+      title: json['title'] as String,
+      description: json['description'] as String?,
+      isCompleted: json['isCompleted'] as bool? ?? false,
+      createdAt: DateTime.parse(json['createdAt'] as String),
+      taskListId: json['taskListId'] as String,
+      dueDateTime: json['dueDateTime'] != null ? DateTime.parse(json['dueDateTime'] as String) : null,
+      isRecurring: json['isRecurring'] as bool? ?? false,
+      recurrencePattern: json['recurrencePattern'] as String?,
+      priority: json['priority'] as String?,
+      subtasks: (json['subtasks'] as List<dynamic>?)?.map((e) => e as String).toList() ?? [],
+      isWishTask: json['isWishTask'] as bool? ?? false,
+      wishTaskDeadline: json['wishTaskDeadline'] != null ? DateTime.parse(json['wishTaskDeadline'] as String) : null,
+      wishTaskCompletionStatus: json['wishTaskCompletionStatus'] as String?,
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'title': title,
+      'description': description,
+      'isCompleted': isCompleted,
+      'createdAt': createdAt.toIso8601String(),
+      'taskListId': taskListId,
+      'dueDateTime': dueDateTime?.toIso8601String(),
+      'isRecurring': isRecurring,
+      'recurrencePattern': recurrencePattern,
+      'priority': priority,
+      'subtasks': subtasks,
+      'isWishTask': isWishTask,
+      'wishTaskDeadline': wishTaskDeadline?.toIso8601String(),
+      'wishTaskCompletionStatus': wishTaskCompletionStatus,
+    };
+  }
+
 
   // Optional: A toString method for easy debugging
   @override

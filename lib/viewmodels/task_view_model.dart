@@ -120,6 +120,12 @@ class TaskViewModel extends ChangeNotifier {
       print('ViewModel: Error deleting task with ID $taskId: $e');
     }
   }
+  /// add task from the parsed json
+  Future<void> addTaskFromParsedJson(Map<String, dynamic> json) async {
+    await _taskService.addTaskFromJson(json);
+    notifyListeners();
+  }
+
 
   /// Cleans up resources when the ViewModel is no longer needed.
   @override

@@ -7,6 +7,11 @@ import 'package:to_do/viewmodels/theme_view_model.dart'; // Re-import ThemeViewM
 import 'package:to_do/utils/app_themes.dart';
 import 'package:to_do/views/widgets/task_card.dart';
 import 'package:to_do/views/widgets/completed_tasks_section.dart';
+import 'dart:convert';
+import 'package:http/http.dart' as http;
+import 'package:permission_handler/permission_handler.dart';
+import 'package:speech_to_text/speech_to_text.dart' as stt;
+import 'package:flutter_native_timezone/flutter_native_timezone.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:go_router/go_router.dart';
 class IndexScreen extends StatefulWidget {
@@ -24,6 +29,146 @@ class _IndexScreenState extends State<IndexScreen> {
     context.go('/register');
     print('Navigating to TaskDetailScreen to edit task: ${task.title}');
   }
+  final stt.SpeechToText _speech = stt.SpeechToText();
+  bool _listening = false;
+  String _transcript = '';
+
+  static const _functionUrl =
+      'https://asia-south1-navigation-38d3a.cloudfunctions.net/parseSpeechToTask';
+
+  Future<bool> _ensureMicPermission() async {
+    // 1) Check current status
+    final status = await Permission.microphone.status; // granted / denied / permanentlyDenied etc.
+    if (status.isGranted) return true; // No dialog, already approved
+
+    // 2) Request on tap – will show OS dialog only if not yet granted
+    final newStatus = await Permission.microphone.request();
+    if (newStatus.isGranted) return true;
+
+    // 3) Handle permanent denial (user selected “Don’t ask again” on Android)
+    // 3) Handle permanent denial (user selected “Don’t ask again” on Android)
+    if (newStatus.isPermanentlyDenied) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Microphone permission permanently denied. Open Settings to enable.'),
+          ),
+        );
+      }
+      await openAppSettings(); // permission_handler helper to open app settings
+    }
+
+    return false;
+  }
+
+  Future<void> _onMicPressed() async {
+    if (!_listening) {
+      final allowed = await _ensureMicPermission(); // Only asks if not granted
+      if (!allowed) {
+        if (!mounted) return;
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Microphone permission denied')),
+        );
+        return;
+      }
+
+      // Initialize speech engine – on iOS/Android this now succeeds after permission
+      final available = await _speech.initialize(
+        onError: (e) => debugPrint('Speech error: $e'),
+        onStatus: (s) => debugPrint('Speech status: $s'),
+      );
+      if (!available) {
+        if (!mounted) return;
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Speech not available')),
+        );
+        return;
+      }
+
+      setState(() => _listening = true);
+      _speech.listen(
+        onResult: (r) => setState(() => _transcript = r.recognizedWords),
+        listenFor: const Duration(seconds: 15),
+        pauseFor: const Duration(seconds: 3),
+        partialResults: true,
+      );
+    } else {
+      await _speech.stop();
+      setState(() => _listening = false);
+      final text = _transcript.trim();
+      if (text.isEmpty) {
+        if (!mounted) return;
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('No speech captured')),
+        );
+        return;
+      }
+      await _callAiAndCreateTask(text); // Your existing function to call the HTTPS endpoint
+    }
+  }
+  Future<void> _callAiAndCreateTask(String text) async {
+    final vm = context.read<TaskViewModel>();
+    final tz = await FlutterNativeTimezone.getLocalTimezone();
+    final nowIso = DateTime.now().toIso8601String();
+
+    try {
+      final resp = await http.post(
+        Uri.parse(_functionUrl),
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode({
+          'text': text,
+          'tz': tz,
+          'nowIso': nowIso,
+          'taskListId': 'default_list_id',
+        }),
+      );
+
+      if (resp.statusCode != 200) {
+        debugPrint('Function error: ${resp.statusCode} ${resp.body}');
+        if (!mounted) return;
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('AI parsing failed')),
+        );
+        return;
+      }
+
+      final data = jsonDecode(resp.body) as Map<String, dynamic>;
+
+      await vm.addTask(
+        title: (data['title'] ?? '').toString(),
+        description: data['description'] as String?,
+        taskListId: (data['taskListId'] ?? 'default_list_id').toString(),
+        dueDateTime: data['dueDateTime'] != null
+            ? DateTime.parse(data['dueDateTime'] as String)
+            : null,
+        priority: data['priority'] as String?,
+        subtasks: (data['subtasks'] as List<dynamic>? ?? [])
+            .map((e) => e.toString())
+            .toList(),
+        isWishTask: (data['isWishTask'] as bool?) ?? false,
+        wishTaskDeadline: data['wishTaskDeadline'] != null
+            ? DateTime.parse(data['wishTaskDeadline'] as String)
+            : null,
+      );
+
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('AI task added: ${data['title']}')),
+      );
+    } catch (e) {
+      debugPrint('HTTP error: $e');
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Network error while creating AI task')),
+      );
+    }
+  }
+  @override
+  void dispose() {
+    _speech.stop();
+    super.dispose();
+  }
+
 
 
   @override
@@ -59,21 +204,29 @@ class _IndexScreenState extends State<IndexScreen> {
         actions: [
           IconButton(
             icon: Icon(
-              themeViewModel.themeMode == ThemeModeType.light
+              Theme.of(context).brightness == Brightness.light
                   ? Icons.light_mode
                   : Icons.dark_mode,
               color: theme.appBarTheme.foregroundColor,
               size: AppDimens.iconSize * 1.2,
             ),
             onPressed: () {
+              // Toggle between light/dark, not system
               themeViewModel.setThemeMode(
-                themeViewModel.themeMode == ThemeModeType.light
+                Theme.of(context).brightness == Brightness.light
                     ? ThemeModeType.dark
                     : ThemeModeType.light,
               );
             },
             tooltip: 'Toggle Theme',
           ),
+
+          IconButton(
+            tooltip: _listening ? 'Stop & Create Task' : 'AI Task (Mic)',
+            icon: Icon(_listening ? Icons.stop_circle : Icons.mic),
+            onPressed: _onMicPressed,
+          ),
+
           SizedBox(width: AppDimens.screenPadding),
           Padding(
             padding: const EdgeInsets.only(right: AppDimens.screenPadding),

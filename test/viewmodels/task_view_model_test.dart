@@ -47,6 +47,12 @@ class FakeTaskService implements TaskService {
     // We only need addListener()/removeListener(), the value itself is unused
     return _boxListenable as ValueListenable<Box<Task>>;
   }
+
+  @override
+  Future<void> addTaskFromJson(Map<String, dynamic> json) {
+    // TODO: implement addTaskFromJson
+    throw UnimplementedError();
+  }
 }
 
 void main() {

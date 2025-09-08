@@ -57,6 +57,11 @@ class TaskService {
       print('❌ Error updating Task ${task.title}: $e');
     }
   }
+  /// Creates a task when we get task data from Json
+  Future<void> addTaskFromJson(Map<String, dynamic> json) async {
+    final task = Task.fromJson(json);
+    await createTask(task); // existing method that saves Task to Hive
+  }
 
   /// Deletes a task from the storage using its unique ID.
   Future<void> deleteTask(String id) async {
