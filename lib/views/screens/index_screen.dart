@@ -2,6 +2,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:to_do/models/task.dart';
+import 'package:to_do/utils/constants.dart';
 import 'package:to_do/viewmodels/task_view_model.dart';
 import 'package:to_do/viewmodels/theme_view_model.dart'; // Re-import ThemeViewModel for its AppBar
 import 'package:to_do/utils/app_themes.dart';
@@ -26,7 +27,8 @@ class _IndexScreenState extends State<IndexScreen> {
 
   void _navigateToEditTask(BuildContext context, Task task) {
     // context.go('/tasks/${task.id}');
-    context.go('/register');
+    // context.go(AppConstants.taskDetailPath);
+
     print('Navigating to TaskDetailScreen to edit task: ${task.title}');
   }
   final stt.SpeechToText _speech = stt.SpeechToText();

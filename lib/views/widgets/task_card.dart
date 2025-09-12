@@ -18,11 +18,11 @@ class TaskCard extends StatelessWidget {
   void _navigateToEditTask(BuildContext context, Task task) {
     GoRouter.of(context).pushNamed(
       'taskDetail',
-      pathParameters: {'id': task.id},
+      extra: task, // Pass full object as extra
     );
-
     print('Navigating to TaskDetailScreen to edit task: ${task.title}');
   }
+
 
   Future<void> _deleteTask(BuildContext context, String taskId) async {
     final theme = Theme.of(context);
@@ -77,7 +77,7 @@ class TaskCard extends StatelessWidget {
       taskViewModel.deleteTask(taskId);
       ScaffoldMessenger.of(
         context,
-      ).showSnackBar(SnackBar(content: Text('Task "${task.title}" deleted!')));
+      ).showSnackBar(SnackBar(content: Text('Task "${task.title}" deleted!'),behavior: SnackBarBehavior.floating,));
       print('Task with ID $taskId deleted.');
     } else {
       print('Deletion cancelled for task with ID $taskId.');

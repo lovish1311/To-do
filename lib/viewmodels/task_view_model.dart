@@ -110,6 +110,15 @@ class TaskViewModel extends ChangeNotifier {
       print('ViewModel: Error updating task ${updatedTask.title}: $e');
     }
   }
+  // In TaskViewModel class
+  Task? getTaskById(String taskId) {
+    try {
+      return _tasks.firstWhere((task) => task.id == taskId);
+    } catch (e) {
+      return null; // Task not found
+    }
+  }
+
 
   /// Deletes a task. (This method is kept for explicit deletion, but not used on completion toggle anymore)
   Future<void> deleteTask(String taskId) async {

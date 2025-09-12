@@ -8,14 +8,19 @@ import 'package:timezone/timezone.dart' as tz;
 /// A screen for adding new tasks or viewing/editing existing task details.
 /// This screen uses a Scaffold but avoids the built-in AppBar, opting for a custom header.
 class TaskDetailScreen extends StatefulWidget {
-  // Optional: Pass an existing task to edit. If null, it's a new task.
-  final Task? task;
+  final String? taskId;    // Add this for GoRouter path parameter
+  final Task? task;        // Keep this for the actual task object
 
-  const TaskDetailScreen({super.key, this.task});
+  const TaskDetailScreen({
+    super.key,
+    this.taskId,           // Add taskId parameter
+    this.task,
+  });
 
   @override
   State<TaskDetailScreen> createState() => _TaskDetailScreenState();
 }
+
 
 class _TaskDetailScreenState extends State<TaskDetailScreen> {
   // Controllers for text input fields
@@ -29,30 +34,68 @@ class _TaskDetailScreenState extends State<TaskDetailScreen> {
   bool _isWishTask = false;
   DateTime? _selectedWishTaskDeadline;
 
+
   // Form key for validation
   final _formKey = GlobalKey<FormState>();
 
   @override
   void initState() {
     super.initState();
-    // If an existing task is passed, pre-fill the fields for editing
-    if (widget.task != null) {
-      _titleController.text = widget.task!.title;
-      _descriptionController.text = widget.task!.description ?? '';
-      _selectedDueDateTime = widget.task!.dueDateTime;
-      _selectedPriority = widget.task!.priority;
-      _isWishTask = widget.task!.isWishTask;
-      _selectedWishTaskDeadline = widget.task!.wishTaskDeadline;
 
-      // Populate subtask controllers
-      if (widget.task!.subtasks.isNotEmpty) {
-        _subtaskControllers = widget.task!.subtasks
-            .map((subtask) => TextEditingController(text: subtask))
-            .toList();
-      }
+    // Debug print to verify what's received
+    print('TaskDetailScreen initialized with:');
+    print('- taskId: ${widget.taskId}');
+    print('- task: ${widget.task?.title}');
+
+    // Handle task initialization
+    if (widget.task != null) {
+      // Fast path: use provided task object (from navigation extra)
+      _initializeWithTask(widget.task!);
+    } else if (widget.taskId != null) {
+      // Fallback: load task by ID (for deep links or when extra is lost)
+      _loadTaskById(widget.taskId!);
     } else {
-      // Add one empty subtask controller for new tasks by default
+      // New task mode
+      _initializeForNewTask();
+    }
+  }
+
+  void _initializeWithTask(Task task) {
+    _titleController.text = task.title;
+    _descriptionController.text = task.description ?? '';
+    _selectedDueDateTime = task.dueDateTime;
+    _selectedPriority = task.priority;
+    _isWishTask = task.isWishTask;
+    _selectedWishTaskDeadline = task.wishTaskDeadline;
+
+    // Populate subtask controllers
+    if (task.subtasks.isNotEmpty) {
+      _subtaskControllers = task.subtasks
+          .map((subtask) => TextEditingController(text: subtask))
+          .toList();
+    } else {
       _subtaskControllers.add(TextEditingController());
+    }
+  }
+
+  void _initializeForNewTask() {
+    // Current initialization for new tasks (already correct)
+    _subtaskControllers.add(TextEditingController());
+  }
+
+  void _loadTaskById(String taskId) {
+    final taskViewModel = Provider.of<TaskViewModel>(context, listen: false);
+    final task = taskViewModel.getTaskById(taskId);
+    if (task != null) {
+      _initializeWithTask(task);
+    } else {
+      // Handle task not found
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Task not found')),
+        );
+        Navigator.of(context).pop();
+      });
     }
   }
 
@@ -201,7 +244,7 @@ class _TaskDetailScreenState extends State<TaskDetailScreen> {
 
     return Scaffold(
       resizeToAvoidBottomInset: true, // Allows content to resize when keyboard appears
-      backgroundColor: colorScheme.background,
+      backgroundColor: colorScheme.surface,
       body: SafeArea( // Ensures content is not obscured by system UI (notch, status bar)
         child: SingleChildScrollView( // Allows content to scroll if it overflows vertically
           padding: const EdgeInsets.all(AppDimens.screenPadding),
@@ -215,12 +258,12 @@ class _TaskDetailScreenState extends State<TaskDetailScreen> {
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     IconButton(
-                      icon: Icon(Icons.arrow_back, color: colorScheme.onBackground),
+                      icon: Icon(Icons.arrow_back, color: colorScheme.onSurface),
                       onPressed: () => Navigator.of(context).pop(), // Go back button
                     ),
                     Text(
                       widget.task == null ? 'New Task' : 'Edit Task',
-                      style: textTheme.headlineMedium?.copyWith(color: colorScheme.onBackground),
+                      style: textTheme.headlineMedium?.copyWith(color: colorScheme.onSurface),
                     ),
                     // Placeholder to balance the row if needed, or another action button
                     IconButton(

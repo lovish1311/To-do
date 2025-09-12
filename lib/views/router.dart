@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:to_do/models/task.dart';
 import 'package:to_do/utils/constants.dart';
 import 'package:to_do/views/screens/app_shell.dart';
 import 'package:to_do/views/screens/login_screen.dart';
@@ -49,16 +50,18 @@ final GoRouter router = GoRouter(
     ),
 
     GoRoute(
-      path: AppConstants.taskDetailPath,
+      path: '/task-detail',
       name: 'taskDetail',
       parentNavigatorKey: _rootNavigatorKey,
       builder: (context, state) {
-        final id = state.pathParameters['id']!;
-        return TaskDetailScreen(
-          task: id == 'new' ? null : null, // Replace with real fetch logic
-        );
+        final task = state.extra as Task?; // ✅ Allow null with Task?
+        return TaskDetailScreen(task: task);
       },
-    ),
+    )
+
+
+    ,
+
     GoRoute(
       path: AppConstants.loginPath,
       name: 'login',
